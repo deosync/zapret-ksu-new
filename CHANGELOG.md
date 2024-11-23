@@ -1,0 +1,3 @@
+- zapret v69.2 from [bol-van/zapret](https://github.com/bol-van/zapret)
+- Arguments from my Powershell script, autohostlist.txt and ipset-discord.txt
+- Added uninstall.sh

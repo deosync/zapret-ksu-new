@@ -1,4 +1,3 @@
-v1.2:
-- zapret binary updated: checking directory /data/adb/modules/zapret and grant permissions to files: *.txt - 666, *.sh - 755, add modify txt file when called "zapret stop"
-- service.sh: wake service method every 30 seconds
-- add /data/adb/modules/zapret/allow.txt for service.sh to know when zapret is need to stop
+v10.0:
+- zapret binary updated: remove all options, only start service (DON'T TOUCH BINARY!)
+- service.sh: wake service every 30 seconds

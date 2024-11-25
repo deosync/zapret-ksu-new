@@ -1,8 +1,4 @@
-v1.0:
-- zapret v69.2 from [bol-van/zapret](https://github.com/bol-van/zapret)
-- Arguments from my Powershell script, autohostlist.txt and ipset-discord.txt
-- Added uninstall.sh
-
-v1.1:
-- zapret binary updated: removed lines with DPI_list.txt and DPI_ignore.txt, updated help and permissions set for txt files
-- update_binary updated: install only for arm64
+v1.2:
+- zapret binary updated: checking directory /data/adb/modules/zapret and grant permissions to files: *.txt - 666, *.sh - 755
+- service.sh: wake service method every 30 seconds
+- add /data/adb/modules/zapret/allow.txt for service.sh to know when zapret is need to stop

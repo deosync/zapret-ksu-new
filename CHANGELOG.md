@@ -1,3 +1,5 @@
-v10.0:
-- **zapret binary updated**: remove all options, only start service **(DON'T TOUCH BINARY!, IT USING service.sh)**
-- **service.sh reloaded**: wake service every 30 seconds
+🔥 v 11.1
+
+- **update-binary updated:** full recoded, check the new requirements: Android API - 27, busybox and i do more small things
+- **zapret binary updated:** discord fixed, exit when nfqws closed
+- **service installed to /data/adb/service.d/**

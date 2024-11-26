@@ -19,10 +19,13 @@
 
 ## FAQ
 Q: What unlocked?
+
 **A: By default in autohostlist.txt unlocking YouTube (+ services), Discord, SoundCloud and Cloudflare, if you need something refresh your page 3-5 times and zapret add blocked site to autohostlist.txt and bypass**
 
 Q. Not working!
+
 **A: Try install a Busybox or flash Custom Kernel**
 
 Q. How this works?
+
 **A: Learn [there](https://github.com/bol-van/zapret/blob/master/docs/readme.en.md#how-it-works) on official repository zapret**

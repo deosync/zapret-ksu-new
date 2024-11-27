@@ -1,5 +1,2 @@
-🔥 v 11.1
-
-- **update-binary updated:** full recoded, check the new requirements: Android API - 27, busybox and i do more small things
-- **zapret binary updated:** discord fixed, exit when nfqws closed
-- **service installed to /data/adb/service.d/**
+- **service script updated:** new mechanism to check zapret started, added lock to keep service script started
+- **zapret binary updated:** changed tcp 80-443 to 80,443 , add 80 to udp

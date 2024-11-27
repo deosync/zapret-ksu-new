@@ -1,2 +1,3 @@
-- **service script updated:** new mechanism to check zapret started, added lock to keep service script started
+- **service script updated:** removed lock file because script is not starting, new mechanism to check zapret started
+- **uninstall & install scripts updated:** add process killing when cleaning directory
 - **zapret binary updated:** changed tcp 80-443 to 80,443 , add 80 to udp

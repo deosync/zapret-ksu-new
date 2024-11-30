@@ -5,3 +5,6 @@ v 12.1:
 
 v 12.2:
 - **zapret binary updated:** using config for 80-443 from original repository
+
+v 12.3:
+- **zapret binary updated:** updated bypass config for 80,443

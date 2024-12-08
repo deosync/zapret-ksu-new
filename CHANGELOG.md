@@ -1,4 +1,4 @@
 - **add support arm**
-- zapret binary removed, replaced to two watchdogs: watch for process nfqws and watch for rules
-- updated **service.sh**
+- zapret binary removed, using stuff on service script
 - new zapret v69.5 from [bol-van/zapret](https://github.com/bol-van/zapret/releases/tag/v69.5)
+- exclude.txt prank

@@ -1,4 +1,4 @@
 - **add support arm**
 - zapret binary removed, using stuff on service script
-- new zapret v69.5 from [bol-van/zapret](https://github.com/bol-van/zapret/releases/tag/v69.5)
+- new zapret version from [build fork](https://github.com/sevcator/zapret/releases/tag/v69.5-08.12.2024)
 - exclude.txt prank

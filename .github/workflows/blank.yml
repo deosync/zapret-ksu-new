@@ -38,6 +38,11 @@ jobs:
         with:
           ndk-version: r21e
 
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libtool autoconf automake
+
       - name: Build
         env:
           ABI: ${{ matrix.abi }}
@@ -74,4 +79,11 @@ jobs:
           CFLAGS="-DZAPRET_GH_VER=${{ github.ref_name }} -DZAPRET_GH_HASH=${{ github.sha }} -I$DEPS_DIR/include" \
           LDFLAGS="-L$DEPS_DIR/lib" \
           make -C zapret android -j$(nproc)
-          ls zapret/binaries/my/*
+          zip zapret-android-$ABI.zip -j zapret/binaries/my/*
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: zapret-android-${{ matrix.abi }}
+          path: zapret-*.zip
+          if-no-files-found: error

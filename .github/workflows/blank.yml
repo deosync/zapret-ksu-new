@@ -5,15 +5,7 @@ on:
   workflow_dispatch:
   push:
     tags:
- Check failure on line 7 in .github/workflows/blank.yml
-
-
-GitHub Actions
-/ .github/workflows/blank.yml
-Invalid workflow file
-
-You have an error in your yaml syntax on line 7
-      - [0-9]+*
+      - '[0-9]+.*'  # Corrected pattern for tag names
     # branches:
     #   - master
     # paths:
@@ -21,7 +13,7 @@ You have an error in your yaml syntax on line 7
     #   - 'mdig/**'
     #   - 'nfq/**'
     #   - 'tpws/**'
-    
+
 jobs:
   build-zapret:
     name: Build Zapret

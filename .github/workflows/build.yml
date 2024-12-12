@@ -82,7 +82,7 @@ jobs:
           mkdir -p $MODULE_DIR/binaries
           cp zapret/binaries/my/nfqws $MODULE_DIR/binaries/
           DATE=$(date +%d%m%Y)
-          COMMIT_HASH=$(git rev-parse --short HEAD)
+          COMMIT_HASH=$(git -C zapret rev-parse --short HEAD)
           VERSION="$DATE-$COMMIT_HASH"
           sed -i "s/-abi-/$ABI/" $MODULE_DIR/module.prop
           sed -i "s/^version=.*/version=$VERSION/" $MODULE_DIR/module.prop

@@ -25,11 +25,6 @@ jobs:
           repository: bol-van/zapret
           path: zapret
 
-      - name: Set up Android NDK
-        uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r21e
-
       - name: Build
         env:
           ABI: ${{ matrix.abi }}

@@ -26,8 +26,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          repository: sevcator/zapret-magisk
-          path: zapret-magisk
+          repository: bol-van/zapret
+          path: zapret
 
       - name: Set up Android NDK
         uses: nttld/setup-ndk@v1
@@ -59,7 +59,7 @@ jobs:
           wget -qO- https://www.netfilter.org/pub/libnfnetlink/libnfnetlink-1.0.2.tar.bz2 | tar -xj
           wget -qO- https://www.netfilter.org/pub/libmnl/libmnl-1.0.5.tar.bz2 | tar -xj
           wget -qO- https://www.netfilter.org/pub/libnetfilter_queue/libnetfilter_queue-1.0.5.tar.bz2 | tar -xj
-          patch -p1 -d libnetfilter_queue-* -i ../zapret-magisk/.github/workflows/libnetfilter_queue-android.patch
+          patch -p1 -d libnetfilter_queue-* -i ../zapret/.github/workflows/libnetfilter_queue-android.patch
 
           for i in libmnl libnfnetlink libnetfilter_queue ; do
             (
@@ -74,19 +74,19 @@ jobs:
           # zapret
           CFLAGS="-DZAPRET_GH_VER=${{ github.ref_name }} -DZAPRET_GH_HASH=${{ github.sha }} -I$DEPS_DIR/include" \
           LDFLAGS="-L$DEPS_DIR/lib" \
-          make -C zapret-magisk android -j$(nproc)
+          make -C zapret android -j$(nproc)
 
       - name: Prepare Module
         run: |
           MODULE_DIR=$GITHUB_WORKSPACE/module
           mkdir -p $MODULE_DIR/binaries
-          cp zapret-magisk/binaries/my/nfqws $MODULE_DIR/binaries/
+          cp zapret/binaries/my/nfqws $MODULE_DIR/binaries/
           DATE=$(date +%d%m%Y)
-          COMMIT_HASH=$(git -C zapret-magisk rev-parse --short HEAD)
+          COMMIT_HASH=$(git -C zapret rev-parse --short HEAD)
           VERSION="$DATE-$COMMIT_HASH"
           echo "version=$VERSION" > $MODULE_DIR/module.prop
           echo "name=Zapret Magisk Module" >> $MODULE_DIR/module.prop
-          echo "author=sevcator" >> $MODULE_DIR/module.prop
+          echo "author=bol-van" >> $MODULE_DIR/module.prop
           echo "description=Zapret Magisk Module for $ABI" >> $MODULE_DIR/module.prop
           echo "minMagisk=21000" >> $MODULE_DIR/module.prop
           zip -r $GITHUB_WORKSPACE/$ABI.zip $MODULE_DIR
@@ -98,8 +98,8 @@ jobs:
           {
               "version": "$VERSION",
               "versionCode": "$VERSION",
-              "zipUrl": "https://github.com/sevcator/zapret-magisk/releases/latest/download/$ABI.zip",
-              "changelog": "https://raw.githubusercontent.com/sevcator/zapret-magisk/refs/heads/main/CHANGELOG.md"
+              "zipUrl": "https://github.com/bol-van/zapret/releases/latest/download/$ABI.zip",
+              "changelog": "https://raw.githubusercontent.com/bol-van/zapret/refs/heads/main/CHANGELOG.md"
           }
           EOF
 
@@ -133,7 +133,7 @@ jobs:
 
       - name: Commit and Push JSON File
         run: |
-          cd zapret-magisk
+          cd zapret
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add ../$ABI.json

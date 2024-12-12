@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     tags:
-      - 'v*'  # Adjusted tag pattern to match tags starting with 'v'
+      - '*'  # Adjusted tag pattern to match tags starting with 'v'
 
 jobs:
   build-android:
@@ -145,13 +145,14 @@ jobs:
           JSON_FILE: $GITHUB_WORKSPACE/${{ matrix.abi }}.json
           ABI: ${{ matrix.abi }}
           VERSION: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
         run: |
-          cat <<EOF > "$JSON_FILE"
+          cat > "$JSON_FILE" <<EOF
 {
   "version": "$VERSION",
   "versionCode": "$VERSION",
-  "zipUrl": "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/${{ matrix.abi }}.zip",
-  "changelog": "https://raw.githubusercontent.com/${{ github.repository }}/main/CHANGELOG.md"
+  "zipUrl": "https://github.com/$REPO/releases/download/$VERSION/$ABI.zip",
+  "changelog": "https://raw.githubusercontent.com/$REPO/main/CHANGELOG.md"
 }
 EOF
 

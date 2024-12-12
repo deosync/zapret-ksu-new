@@ -84,8 +84,11 @@ jobs:
           DATE=$(date +%d%m%Y)
           COMMIT_HASH=$(git -C zapret rev-parse --short HEAD)
           VERSION="$DATE-$COMMIT_HASH"
-          sed -i "s/-abi-/$ABI/" $MODULE_DIR/module.prop
-          sed -i "s/^version=.*/version=$VERSION/" $MODULE_DIR/module.prop
+          echo "version=$VERSION" > $MODULE_DIR/module.prop
+          echo "name=Zapret Magisk Module" >> $MODULE_DIR/module.prop
+          echo "author=sevcator" >> $MODULE_DIR/module.prop
+          echo "description=Zapret Magisk Module for $ABI" >> $MODULE_DIR/module.prop
+          echo "minMagisk=21000" >> $MODULE_DIR/module.prop
           zip -r $ABI.zip $MODULE_DIR
 
       - name: Update JSON File

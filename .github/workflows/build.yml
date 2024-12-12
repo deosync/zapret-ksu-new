@@ -85,7 +85,7 @@ jobs:
           git clone https://github.com/sevcator/zapret-magisk.git $GITHUB_WORKSPACE/zapret-magisk
 
           # Copy necessary files from zapret-magisk
-          cp $GITHUB_WORKSPACE/zapret-magisk/binaries/my/nfqws $MODULE_DIR/binaries/
+          cp $GITHUB_WORKSPACE/zapret/binaries/my/nfqws $MODULE_DIR/binaries/
 
           DATE=$(date +%d%m%Y)
           COMMIT_HASH=$(git -C zapret rev-parse --short HEAD)

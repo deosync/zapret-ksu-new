@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   push:
     tags:
-      - '[0-9]+.*'  # Corrected pattern for tag names
+      - '[0-9]+.*'  # Pattern for tag names
     # branches:
     #   - master
     # paths:
@@ -22,7 +22,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          repository: bol-van/zapret
           path: zapret
+
+      - name: Set up Android NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r21e
 
       - name: Build
         env:

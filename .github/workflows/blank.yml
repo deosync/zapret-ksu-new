@@ -5,6 +5,14 @@ on:
   workflow_dispatch:
   push:
     tags:
+ Check failure on line 7 in .github/workflows/blank.yml
+
+
+GitHub Actions
+/ .github/workflows/blank.yml
+Invalid workflow file
+
+You have an error in your yaml syntax on line 7
       - [0-9]+*
     # branches:
     #   - master
@@ -39,13 +47,11 @@ jobs:
           export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
           export STRIP=$TOOLCHAIN/bin/llvm-strip
           export PKG_CONFIG_PATH=$DEPS_DIR/lib/pkgconfig
-
           # netfilter libs
           wget -qO- https://www.netfilter.org/pub/libnfnetlink/libnfnetlink-1.0.2.tar.bz2 | tar -xj
           wget -qO- https://www.netfilter.org/pub/libmnl/libmnl-1.0.5.tar.bz2 | tar -xj
           wget -qO- https://www.netfilter.org/pub/libnetfilter_queue/libnetfilter_queue-1.0.5.tar.bz2 | tar -xj
           patch -p1 -d libnetfilter_queue-* -i ../zapret/.github/workflows/libnetfilter_queue-android.patch
-
           for i in libmnl libnfnetlink libnetfilter_queue ; do
             (
               cd $i-*
@@ -55,7 +61,6 @@ jobs:
             )
             sed -i "s|^prefix=.*|prefix=$DEPS_DIR|g" $DEPS_DIR/lib/pkgconfig/$i.pc
           done
-
           # zapret
           CFLAGS="-DZAPRET_GH_VER=${{ github.ref_name }} -DZAPRET_GH_HASH=${{ github.sha }} -I$DEPS_DIR/include" \
           LDFLAGS="-L$DEPS_DIR/lib" \

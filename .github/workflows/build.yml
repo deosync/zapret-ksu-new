@@ -1,11 +1,12 @@
-name: Build and Release Zapret Magisk Module
+name: build
+run-name: ${{ startsWith(github.ref, 'refs/tags/v') && format('Release {0}', github.ref_name) || null }}
 
 on:
   workflow_dispatch:
   push:
     tags:
-      - '*'  # Adjusted tag pattern to match tags starting with 'v'
-
+      - [0-9]+*
+      
 jobs:
   build-android:
     name: Android ${{ matrix.abi }}

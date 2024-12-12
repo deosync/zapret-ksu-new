@@ -1,5 +1,5 @@
 name: build
-run-name: \${{ startsWith(github.ref, 'refs/tags/') && format('Release {0}', github.ref_name) || null }}
+run-name: ${{ startsWith(github.ref, 'refs/tags/') && format('Release {0}', github.ref_name) || null }}
 
 on:
   workflow_dispatch:
@@ -77,18 +77,31 @@ jobs:
         run: |
           MODULE_DIR=$GITHUB_WORKSPACE/module
           mkdir -p $MODULE_DIR/binaries
-          cp -r zapret/nfqws-$ABI/* $MODULE_DIR/binaries/
+          cp -r zapret/binaries/my/nfqws/* $MODULE_DIR/binaries/
           DATE=$(date +%d%m%Y)
           COMMIT_HASH=$(git rev-parse --short HEAD)
           VERSION="$DATE-$COMMIT_HASH"
+          sed -i "s/-abi-/$ABI/" $MODULE_DIR/module.prop
           sed -i "s/^version=.*/version=$VERSION/" $MODULE_DIR/module.prop
-          zip -r zapret-Magisk.zip $MODULE_DIR
+          zip -r $ABI.zip $MODULE_DIR
+
+      - name: Update JSON File
+        run: |
+          JSON_FILE=$GITHUB_WORKSPACE/$ABI.json
+          cat <<EOF > $JSON_FILE
+          {
+              "version": "$VERSION",
+              "versionCode": "$VERSION",
+              "zipUrl": "https://github.com/sevcator/zapret-magisk/releases/latest/download/$ABI.zip",
+              "changelog": "https://raw.githubusercontent.com/sevcator/zapret-magisk/refs/heads/main/CHANGELOG.md"
+          }
+          EOF
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: zapret-Magisk.zip
-          path: zapret-Magisk.zip
+          name: $ABI.zip
+          path: $ABI.zip
           if-no-files-found: error
 
       - name: Create Release
@@ -108,6 +121,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: zapret-Magisk.zip
-          asset_name: zapret-Magisk.zip
+          asset_path: $ABI.zip
+          asset_name: $ABI.zip
           asset_content_type: application/zip
+
+      - name: Commit and Push JSON File
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add $ABI.json
+          git commit -m "Update $ABI.json for release ${{ github.ref_name }}"
+          git push

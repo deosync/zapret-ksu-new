@@ -1,7 +1,0 @@
-id=zapret
-name=zapret
-version=-version-
-versionCode=-version-
-author=sevcator, ImMALWARE, bol-van
-description=🖥 Bypass internet-censorship on arm64 Android devices.
-updateJson=https://raw.githubusercontent.com/sevcator/zapret-magisk/refs/heads/main/update.json

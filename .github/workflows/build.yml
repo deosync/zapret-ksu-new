@@ -89,7 +89,7 @@ jobs:
           echo "author=sevcator" >> $MODULE_DIR/module.prop
           echo "description=Zapret Magisk Module for $ABI" >> $MODULE_DIR/module.prop
           echo "minMagisk=21000" >> $MODULE_DIR/module.prop
-          zip -r $ABI.zip $MODULE_DIR
+          zip -r $GITHUB_WORKSPACE/$ABI.zip $MODULE_DIR
 
       - name: Update JSON File
         run: |
@@ -107,7 +107,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: $ABI.zip
-          path: $ABI.zip
+          path: $GITHUB_WORKSPACE/$ABI.zip
           if-no-files-found: error
 
       - name: Create Release
@@ -127,7 +127,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: $ABI.zip
+          asset_path: $GITHUB_WORKSPACE/$ABI.zip
           asset_name: $ABI.zip
           asset_content_type: application/zip
 

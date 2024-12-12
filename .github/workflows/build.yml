@@ -1,18 +1,11 @@
 name: build
-run-name: ${{ startsWith(github.ref, 'refs/tags/v') && format('Release {0}', github.ref_name) || null }}
+run-name: \${{ startsWith(github.ref, 'refs/tags/') && format('Release {0}', github.ref_name) || null }}
 
 on:
   workflow_dispatch:
   push:
     tags:
-      - v[0-9]+*
-    # branches:
-    #   - master
-    # paths:
-    #   - 'ip2net/**'
-    #   - 'mdig/**'
-    #   - 'nfq/**'
-    #   - 'tpws/**'
+      - '[0-9]+*'
 
 jobs:
   build-android:
@@ -79,11 +72,42 @@ jobs:
           CFLAGS="-DZAPRET_GH_VER=${{ github.ref_name }} -DZAPRET_GH_HASH=${{ github.sha }} -I$DEPS_DIR/include" \
           LDFLAGS="-L$DEPS_DIR/lib" \
           make -C zapret android -j$(nproc)
-          zip zapret-android-$ABI.zip -j zapret/binaries/my/*
+
+      - name: Prepare Module
+        run: |
+          MODULE_DIR=$GITHUB_WORKSPACE/module
+          mkdir -p $MODULE_DIR/binaries
+          cp -r zapret/nfqws-$ABI/* $MODULE_DIR/binaries/
+          DATE=$(date +%d%m%Y)
+          COMMIT_HASH=$(git rev-parse --short HEAD)
+          VERSION="$DATE-$COMMIT_HASH"
+          sed -i "s/^version=.*/version=$VERSION/" $MODULE_DIR/module.prop
+          zip -r zapret-Magisk.zip $MODULE_DIR
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: zapret-android-${{ matrix.abi }}
-          path: zapret-*.zip
+          name: zapret-Magisk.zip
+          path: zapret-Magisk.zip
           if-no-files-found: error
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: zapret-Magisk.zip
+          asset_name: zapret-Magisk.zip
+          asset_content_type: application/zip

@@ -1,11 +1,10 @@
-name: build
-run-name: ${{ startsWith(github.ref, 'refs/tags/') && format('Release {0}', github.ref_name) || null }}
+name: Build and Release Zapret Magisk Module
 
 on:
   workflow_dispatch:
   push:
     tags:
-      - '[0-9]+*'
+      - 'v*'  # Adjusted tag pattern to match tags starting with 'v'
 
 jobs:
   build-android:
@@ -23,10 +22,10 @@ jobs:
           - abi: x86_64
             target: x86_64-linux-android
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          repository: bol-van/zapret
+          fetch-depth: 0  # Ensure all history is fetched, needed for git version info
           path: zapret
 
       - name: Set up Android NDK
@@ -37,13 +36,16 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libtool autoconf automake
+          sudo apt-get install -y build-essential libtool autoconf automake pkg-config
 
       - name: Build
         env:
           ABI: ${{ matrix.abi }}
           TARGET: ${{ matrix.target }}
         run: |
+          set -e
+          set -x
+
           DEPS_DIR=$GITHUB_WORKSPACE/deps
           export TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64
           export API=21
@@ -55,93 +57,110 @@ jobs:
           export STRIP=$TOOLCHAIN/bin/llvm-strip
           export PKG_CONFIG_PATH=$DEPS_DIR/lib/pkgconfig
 
+          mkdir -p $DEPS_DIR
+
           # netfilter libs
           wget -qO- https://www.netfilter.org/pub/libnfnetlink/libnfnetlink-1.0.2.tar.bz2 | tar -xj
           wget -qO- https://www.netfilter.org/pub/libmnl/libmnl-1.0.5.tar.bz2 | tar -xj
           wget -qO- https://www.netfilter.org/pub/libnetfilter_queue/libnetfilter_queue-1.0.5.tar.bz2 | tar -xj
-          patch -p1 -d libnetfilter_queue-* -i ../zapret/.github/workflows/libnetfilter_queue-android.patch
+          patch -p1 -d libnetfilter_queue-1.0.5 -i $GITHUB_WORKSPACE/zapret/.github/workflows/libnetfilter_queue-android.patch
 
-          for i in libmnl libnfnetlink libnetfilter_queue ; do
+          for lib in libmnl-1.0.5 libnfnetlink-1.0.2 libnetfilter_queue-1.0.5 ; do
             (
-              cd $i-*
+              cd $lib
+              autoreconf -fi
               CFLAGS="-Os -flto=auto -Wno-implicit-function-declaration" \
               ./configure --prefix= --host=$TARGET --enable-static --disable-shared --disable-dependency-tracking
-              make install -j$(nproc) DESTDIR=$DEPS_DIR
+              make -j$(nproc) install DESTDIR=$DEPS_DIR
             )
-            sed -i "s|^prefix=.*|prefix=$DEPS_DIR|g" $DEPS_DIR/lib/pkgconfig/$i.pc
+            sed -i "s|^prefix=.*|prefix=$DEPS_DIR|g" $DEPS_DIR/lib/pkgconfig/$(basename $lib .*-*).pc
           done
 
-          # zapret
-          CFLAGS="-DZAPRET_GH_VER=${{ github.ref_name }} -DZAPRET_GH_HASH=${{ github.sha }} -I$DEPS_DIR/include" \
-          LDFLAGS="-L$DEPS_DIR/lib" \
-          make -C zapret android -j$(nproc)
+          # Build nfqws
+          cd $GITHUB_WORKSPACE/zapret/src/nfqws
+          make CC="$CC" LDFLAGS="-static -L$DEPS_DIR/lib" CFLAGS="-I$DEPS_DIR/include -DANDROID -Os"
+
+          mkdir -p $GITHUB_WORKSPACE/output/$ABI
+          cp nfqws $GITHUB_WORKSPACE/output/$ABI/
 
       - name: Prepare Module
+        env:
+          MODULE_DIR: ${{ github.workspace }}/module
+          ZAPRET_DIR: ${{ github.workspace }}/zapret
+          ABI: ${{ matrix.abi }}
         run: |
-          MODULE_DIR=$GITHUB_WORKSPACE/module
-          mkdir -p $MODULE_DIR/binaries
+          set -e
+          set -x
 
-          # Clone sevcator/zapret-magisk repository
-          git clone https://github.com/sevcator/zapret-magisk.git $GITHUB_WORKSPACE/zapret-magisk
+          # Clone the zapret-magisk repository into MODULE_DIR
+          git clone https://github.com/sevcator/zapret-magisk.git "$MODULE_DIR"
 
-          # Copy necessary files from zapret-magisk
-          cp $GITHUB_WORKSPACE/zapret/binaries/my/nfqws $MODULE_DIR/binaries/
+          # Ensure the binaries directory exists
+          mkdir -p "$MODULE_DIR/binaries"
 
-          DATE=$(date +%d%m%Y)
-          COMMIT_HASH=$(git -C zapret rev-parse --short HEAD)
-          VERSION="$DATE-$COMMIT_HASH"
-          echo "version=$VERSION" > $MODULE_DIR/module.prop
-          echo "name=Zapret Magisk Module" >> $MODULE_DIR/module.prop
-          echo "author=bol-van" >> $MODULE_DIR/module.prop
-          echo "description=Zapret Magisk Module for $ABI" >> $MODULE_DIR/module.prop
-          echo "minMagisk=21000" >> $MODULE_DIR/module.prop
-          zip -r $GITHUB_WORKSPACE/$ABI.zip $MODULE_DIR
+          # Copy the freshly built nfqws binary into the module's binaries folder
+          cp "$GITHUB_WORKSPACE/output/$ABI/nfqws" "$MODULE_DIR/binaries/"
 
-      - name: Update JSON File
-        run: |
-          JSON_FILE=$GITHUB_WORKSPACE/$ABI.json
-          cat <<EOF > $JSON_FILE
-          {
-              "version": "$VERSION",
-              "versionCode": "$VERSION",
-              "zipUrl": "https://github.com/bol-van/zapret/releases/latest/download/$ABI.zip",
-              "changelog": "https://raw.githubusercontent.com/bol-van/zapret/refs/heads/main/CHANGELOG.md"
-          }
-          EOF
+          # Update version information in module.prop
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION="${{ github.ref_name }}"
+          else
+            DATE=$(date +%Y%m%d)
+            COMMIT_HASH=$(git -C "$ZAPRET_DIR" rev-parse --short HEAD)
+            VERSION="$DATE-$COMMIT_HASH"
+          fi
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+          # Update module.prop
+          sed -i "s/^version=.*/version=${VERSION}/" "$MODULE_DIR/module.prop"
+          sed -i "s/^description=.*/description=Zapret Magisk Module for $ABI/" "$MODULE_DIR/module.prop"
+
+          # Ensure scripts have executable permissions
+          find "$MODULE_DIR" -type f -iname "*.sh" -exec chmod +x {} \;
+
+          # Zip the module directory from within the module folder
+          cd "$MODULE_DIR"
+          zip -r "$GITHUB_WORKSPACE/$ABI.zip" ./*
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
         with:
-          name: $ABI.zip
-          path: $GITHUB_WORKSPACE/$ABI.zip
-          if-no-files-found: error
+          name: ${{ matrix.abi }}-module
+          path: $GITHUB_WORKSPACE/${{ matrix.abi }}.zip
 
       - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: ncipollo/release-action@v1
         with:
-          tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
+          artifacts: $GITHUB_WORKSPACE/${{ matrix.abi }}.zip
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: Release ${{ github.ref_name }}
+          tag: ${{ github.ref_name }}
           draft: false
           prerelease: false
+          allowUpdates: true
 
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
+      - name: Update JSON File
+        if: startsWith(github.ref, 'refs/tags/')
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: $GITHUB_WORKSPACE/$ABI.zip
-          asset_name: $ABI.zip
-          asset_content_type: application/zip
+          JSON_FILE: $GITHUB_WORKSPACE/${{ matrix.abi }}.json
+          ABI: ${{ matrix.abi }}
+          VERSION: ${{ github.ref_name }}
+        run: |
+          cat <<EOF > "$JSON_FILE"
+{
+  "version": "$VERSION",
+  "versionCode": "$VERSION",
+  "zipUrl": "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/${{ matrix.abi }}.zip",
+  "changelog": "https://raw.githubusercontent.com/${{ github.repository }}/main/CHANGELOG.md"
+}
+EOF
 
       - name: Commit and Push JSON File
-        run: |
-          cd zapret
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add ../$ABI.json
-          git commit -m "Update $ABI.json for release ${{ github.ref_name }}"
-          git push
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Update ${{ matrix.abi }}.json for release ${{ github.ref_name }}"
+          file_pattern: "${{ matrix.abi }}.json"
+          branch: main  # Replace with your default branch if different
+          commit_user_name: github-actions[bot]
+          commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com

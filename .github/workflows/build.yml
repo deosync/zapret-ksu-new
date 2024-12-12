@@ -77,7 +77,7 @@ jobs:
         run: |
           MODULE_DIR=$GITHUB_WORKSPACE/module
           mkdir -p $MODULE_DIR/binaries
-          cp -r zapret/binaries/my/nfqws/* $MODULE_DIR/binaries/
+          cp zapret/binaries/my/nfqws $MODULE_DIR/binaries/
           DATE=$(date +%d%m%Y)
           COMMIT_HASH=$(git rev-parse --short HEAD)
           VERSION="$DATE-$COMMIT_HASH"

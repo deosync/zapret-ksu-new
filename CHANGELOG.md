@@ -1,4 +1,3 @@
-- **add support arm**
-- zapret binary removed, using stuff on service script
-- latest [nfqws](https://github.com/sevcator/zapret/releases/tag/v69.6-9d83986-fix)
-- exclude.txt prank
+- [Telegram](https://sevcator.t.me)
+- [GitHub](https://github.com/sevcator/)
+- [Repository](https://github.com/sevcator/zapret-magisk/)

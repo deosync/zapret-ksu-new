@@ -1,3 +1,5 @@
 - [Telegram](https://sevcator.t.me)
 - [GitHub](https://github.com/sevcator/)
-- [Repository](https://github.com/sevcator/zapret-magisk/)
+- [GitHub Repository](https://github.com/sevcator/zapret-magisk/)
+
+Some fixes, updated zapret version and something else.

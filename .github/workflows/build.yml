@@ -14,16 +14,16 @@ jobs:
       matrix:
         abi: [armeabi-v7a, arm64-v8a, x86, x86_64]
     steps:
-      - name: Clone Zapret Repository
-        run: |
-          git clone https://github.com/bol-van/zapret.git
-          cd zapret
-          git submodule update --init --recursive
+      - name: Checkout bol-van/zapret Repository
+        uses: actions/checkout@v3
+        with:
+          repository: bol-van/zapret
+          path: zapret
 
       - name: Set up Android NDK
         run: |
-          wget https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
-          unzip android-ndk-r25b-linux.zip -d $HOME
+          wget https://dl.google.com/android/repository/android-ndk-r25b-linux.zip -O ndk.zip
+          unzip ndk.zip -d $HOME
           export ANDROID_NDK_HOME=$HOME/android-ndk-r25b
           echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
 
@@ -40,15 +40,18 @@ jobs:
           export LD=$TOOLCHAIN/bin/ld
           export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
 
-          cd zapret
+          cd zapret/nfq
           make clean
-          make TARGET=$ABI
+          make ABI=$ABI
+
+          mkdir -p ../binaries/my/$ABI
+          cp nfqws ../binaries/my/$ABI/nfqws
 
       - name: Upload Binary
         uses: actions/upload-artifact@v3
         with:
           name: nfqws-${{ matrix.abi }}
-          path: zapret/binaries/my/nfqws
+          path: zapret/binaries/my/${{ matrix.abi }}/nfqws
 
   build-module:
     name: Build Zapret Module
@@ -61,11 +64,12 @@ jobs:
       - name: Download Binaries
         uses: actions/download-artifact@v3
         with:
-          path: binaries
+          name: nfqws-${{ matrix.abi }}
 
       - name: Prepare Module
-        id: prepare
         run: |
+          mkdir -p module/binaries
+          cp -r binaries module/
           cd module
           COMMIT=$(git rev-parse --short HEAD)
           DATE=$(date +%Y%m%d)
@@ -77,10 +81,7 @@ jobs:
           echo "description=🖥 Bypass internet-censorship on arm64 Android devices." >> module.prop
           echo "updateJson=https://raw.githubusercontent.com/sevcator/zapret-magisk/refs/heads/main/update.json" >> module.prop
           cd ..
-          cp -r binaries module/
           zip -r zm-$DATE-$COMMIT.zip module
-          echo "date=$DATE" >> $GITHUB_ENV
-          echo "commit=$COMMIT" >> $GITHUB_ENV
 
       - name: Publish Release
         uses: actions/upload-release-asset@v1
@@ -88,6 +89,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: zm-${{ env.date }}-${{ env.commit }}.zip
-          asset_name: zm-${{ env.date }}-${{ env.commit }}.zip
+          asset_path: zm-${{ steps.prepare.outputs.date }}-${{ steps.prepare.outputs.commit }}.zip
+          asset_name: zm-${{ steps.prepare.outputs.date }}-${{ steps.prepare.outputs.commit }}.zip
           asset_content_type: application/zip

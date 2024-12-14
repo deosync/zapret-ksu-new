@@ -62,14 +62,10 @@ jobs:
           wget -qO- https://www.netfilter.org/pub/libnfnetlink/libnfnetlink-1.0.2.tar.bz2 | tar -xj
           wget -qO- https://www.netfilter.org/pub/libmnl/libmnl-1.0.5.tar.bz2 | tar -xj
           wget -qO- https://www.netfilter.org/pub/libnetfilter_queue/libnetfilter_queue-1.0.5.tar.bz2 | tar -xj
-          wget https://raw.githubusercontent.com/bol-van/zapret/refs/heads/master/.github/workflows/libnetfilter_queue-android.patch -O libnetfilter_queue-android.patch
-
-          # Ensure the patch file is available and check current directory
-          echo "Current Directory: $(pwd)"
-          ls -l
+          wget https://raw.githubusercontent.com/bol-van/zapret/refs/heads/master/.github/workflows/libnetfilter_queue-android.patch -O patch.patch
 
           # Apply the patch using the full path
-          patch -p1 -i $GITHUB_WORKSPACE/libnetfilter_queue-android.patch -d libnetfilter_queue-*
+          patch -p1 -i $GITHUB_WORKSPACE/patch.patch -d libnetfilter_queue-*
 
           for i in libmnl libnfnetlink libnetfilter_queue ; do
             (

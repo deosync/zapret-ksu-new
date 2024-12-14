@@ -9,16 +9,16 @@ ui_print() {
 check_requirements() {
   case "$ARCH" in
     arm)
-      BINARY_PATH=$MODPATH/binary/nfqws-arm
+      BINARY_PATH=$MODPATH/nfqws-arm
       ;;
     arm64)
-      BINARY_PATH=$MODPATH/binary/nfqws-aarch64
+      BINARY_PATH=$MODPATH/nfqws-aarch64
       ;;
     x86)
-      BINARY_PATH=$MODPATH/binary/nfqws-x86
+      BINARY_PATH=$MODPATH/nfqws-x86
       ;;
     x86_64)
-      BINARY_PATH=$MODPATH/binary/nfqws-x86_x64
+      BINARY_PATH=$MODPATH/nfqws-x86_x64
       ;;
     *)
       ui_print "! Unsupported architecture: $ARCH"
@@ -56,9 +56,12 @@ install_module() {
   pkill nfqws
   pkill zapret
 
-  ui_print "Copying nfqws for $ARCH"
-  cp -af "$BINARY_PATH" "$MODPATH/nfqws"
+  ui_print "- Copying nfqws for $ARCH"
+  mv "$BINARY_PATH" "$MODPATH/nfqws"
 
+  ui_print "- Remove binaries for another processors"
+  rm -rf nfqws-*
+  
   if [ -f "$MODULE_DIR/zapret.sh" ]; then
     mv "$MODULE_DIR/zapret.sh" "$SERVICE_DIR/zapret.sh"
     ui_print "- zapret.sh moved to $SERVICE_DIR/"

@@ -13,6 +13,7 @@ jobs:
     strategy:
       matrix:
         abi: [armeabi-v7a, arm64-v8a, x86, x86_64]
+
     steps:
       - name: Checkout bol-van/zapret Repository
         uses: actions/checkout@v3
@@ -22,13 +23,24 @@ jobs:
 
       - name: Set up Android NDK
         run: |
+          # Download and unzip the NDK
           wget https://dl.google.com/android/repository/android-ndk-r25b-linux.zip -O ndk.zip
           unzip ndk.zip -d $HOME
           export ANDROID_NDK_HOME=$HOME/android-ndk-r25b
           echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
 
+      - name: Verify NDK installation
+        run: |
+          # Check the NDK directory contents
+          echo "Checking NDK installation..."
+          ls -l $ANDROID_NDK_HOME
+          ls -l $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin
+          which clang
+          clang --version
+
       - name: Build for ${{ matrix.abi }}
         run: |
+          # Set up environment variables for the build process
           export ABI=${{ matrix.abi }}
           export TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64
           export TARGET=${ABI/-*/}-linux-android
@@ -40,10 +52,16 @@ jobs:
           export LD=$TOOLCHAIN/bin/ld
           export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
 
+          # Check if clang is available
+          echo "Using clang: $CC"
+          which $CC
+
+          # Build the project with verbose output to help with debugging
           cd zapret/nfq
           make clean
-          make ABI=$ABI
+          make ABI=$ABI VERBOSE=1
 
+          # Copy the binary to the artifacts folder
           mkdir -p ../binaries/my/$ABI
           cp nfqws ../binaries/my/$ABI/nfqws
 

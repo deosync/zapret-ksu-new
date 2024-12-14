@@ -85,48 +85,45 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Create binaries directory
-        run: mkdir -p module/binaries
-
       - name: Download nfqws armeabi-v7a
         uses: actions/download-artifact@v4
         with:
           name: nfqws-armeabi-v7a
-          path: module/binaries
+          path: module
 
       - name: Rename nfqws to nfqws-arm
         run: |
-          mv module/binaries/nfqws module/binaries/nfqws-arm
+          mv module/nfqws module/nfqws-arm
 
       - name: Download nfqws arm64-v8a
         uses: actions/download-artifact@v4
         with:
           name: nfqws-arm64-v8a
-          path: module/binaries
+          path: module
 
       - name: Rename nfqws to nfqws-aarch64
         run: |
-          mv module/binaries/nfqws module/binaries/nfqws-aarch64
+          mv module/nfqws module/nfqws-aarch64
 
       - name: Download nfqws x86
         uses: actions/download-artifact@v4
         with:
           name: nfqws-x86
-          path: module/binaries
+          path: module
 
       - name: Rename nfqws to nfqws-x86
         run: |
-          mv module/binaries/nfqws module/binaries/nfqws-x86
+          mv module/nfqws module/nfqws-x86
 
       - name: Download nfqws x86_64
         uses: actions/download-artifact@v4
         with:
           name: nfqws-x86_64
-          path: module/binaries
+          path: module
 
       - name: Rename nfqws to nfqws-x86_x64
         run: |
-          mv module/binaries/nfqws module/binaries/nfqws-x86_x64
+          mv module/nfqws module/nfqws-x86_x64
 
       - name: Build
         run: |

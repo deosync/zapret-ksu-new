@@ -1,6 +1,6 @@
 {
-  "version": "${DATE}-${COMMIT}",
-  "versionCode": "${DATE}-${COMMIT}",
-  "zipUrl": "https://github.com/sevcator/zapret-magisk/releases/download/${DATE}-${COMMIT}/zm-${DATE}-${COMMIT}.zip",
+  "version": "20241214-d44c76e",
+  "versionCode": "20241214-d44c76e",
+  "zipUrl": "https://github.com/sevcator/zapret-magisk/releases/download/20241214-d44c76e/zm-20241214-d44c76e.zip",
   "changelog": "https://raw.githubusercontent.com/sevcator/zapret-magisk/main/CHANGELOG.md"
 }

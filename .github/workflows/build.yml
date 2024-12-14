@@ -168,7 +168,7 @@ jobs:
 
       - name: Push update.json to main branch
         run: |
-          git push origin HEAD:main
+          git push origin HEAD:main --force
 
       - name: Create a Git tag
         id: date_commit

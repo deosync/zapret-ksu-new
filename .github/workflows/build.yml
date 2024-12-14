@@ -1,4 +1,4 @@
-name: Build and Test Android Project
+name: sevcator.t.me
 
 on:
   push:
@@ -75,6 +75,7 @@ jobs:
           name: nfqws-${{ matrix.abi }}
           path: zapret/binaries/my/nfqws
           if-no-files-found: error
+          
   build-module:
     name: Build Zapret Module
     runs-on: ubuntu-latest
@@ -87,7 +88,7 @@ jobs:
       - name: Download Binary Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: nfqws-${{ matrix.abi }}
+          name: nfqws-*
 
       - name: Prepare Module
         run: |

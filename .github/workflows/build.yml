@@ -95,6 +95,7 @@ jobs:
 
       - name: Build Module
         run: |
+          ls -l
           mkdir -p module/binaries
           cp nfqws-* module/binaries/
           cd module

@@ -119,12 +119,11 @@ jobs:
 
           COMMIT=$(git rev-parse --short HEAD)
           DATE=$(date +%Y%m%d)
-          VERSION=$DATE-$COMMIT
           
           echo "id=zapret" > module.prop
           echo "name=zapret" >> module.prop
-          echo "version=$VERSION" >> module.prop
-          echo "versionCode=$VERSION" >> module.prop
+          echo "version=${DATE}-${COMMIT}" >> module.prop
+          echo "versionCode=${DATE}-${COMMIT}" >> module.prop
           echo "author=sevcator, ImMALWARE, bol-van" >> module.prop
           echo "description=🖥 Bypass internet-censorship on Android devices." >> module.prop
           echo "updateJson=https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/update.json" >> module.prop
@@ -140,14 +139,14 @@ jobs:
       - name: Update update.json
         run: |
           echo '{
-            "version": "'${DATE}-${COMMIT}'",
-            "versionCode": "'${DATE}-${COMMIT}'",
-            "zipUrl": "https://github.com/${{ github.repository }}/releases/download/'${DATE}-${COMMIT}'/zm-'${DATE}-${COMMIT}'.zip",
+            "version": "${DATE}-${COMMIT}",
+            "versionCode": "${DATE}-${COMMIT}",
+            "zipUrl": "https://github.com/${{ github.repository }}/releases/download/${DATE}-${COMMIT}/zm-${DATE}-${COMMIT}.zip",
             "changelog": "https://raw.githubusercontent.com/${{ github.repository }}/main/CHANGELOG.md"
           }' > update.json
     
           git add update.json
-          git commit -m "Update update.json for release $DATE-$COMMIT"
+          git commit -m "Update update.json for release ${DATE}-${COMMIT}"
 
       - name: Push update.json to main branch
         run: |

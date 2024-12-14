@@ -132,6 +132,11 @@ jobs:
           cd ..
           zip -r zm-$DATE-$COMMIT.zip module/*
 
+      - name: Set up Git
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
       - name: Update update.json
         run: |
           echo '{
@@ -147,11 +152,6 @@ jobs:
       - name: Push update.json to main branch
         run: |
           git push origin HEAD:main
-
-      - name: Set up Git
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
 
       - name: Get current date and commit hash
         id: date_commit

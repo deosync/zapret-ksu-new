@@ -148,7 +148,7 @@ jobs:
           }' > update.json
     
           git add update.json
-          git commit -m "Update update.json for release ${{ env.version }}"
+          git commit -m "${{ env.version }}"
 
       - name: Push update.json to main branch
         run: |

@@ -59,17 +59,22 @@ install_module() {
   ui_print "- Copying nfqws for $ARCH"
   mv "$BINARY_PATH" "$MODPATH/nfqws"
 
-  ui_print "- Remove binaries for another processors"
+  ui_print "- Removing binaries for another processors"
   rm -rf nfqws-*
+
+  if ls $MODULE_DIR/*.txt 1> /dev/null 2>&1; then
+    ui_print "- Removing txt files in $MODULE_UPDATE_DIR"
+    rm -f $MODULE_UPDATE_DIR/*.txt
+  fi
   
   if [ -f "$MODULE_DIR/zapret.sh" ]; then
     mv "$MODULE_DIR/zapret.sh" "$SERVICE_DIR/zapret.sh"
-    ui_print "- zapret.sh moved to $SERVICE_DIR/"
+    ui_print "- zapret.sh moved to $SERVICE_DIR"
   fi
 
   if [ -f "$MODULE_UPDATE_DIR/zapret.sh" ]; then
     mv "$MODULE_UPDATE_DIR/zapret.sh" "$SERVICE_DIR/zapret.sh"
-    ui_print "- zapret.sh moved to $SERVICE_DIR/"
+    ui_print "- zapret.sh moved to $SERVICE_DIR"
   fi
 
   if [ ! -f "$SERVICE_DIR/zapret.sh" ]; then

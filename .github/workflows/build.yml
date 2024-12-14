@@ -127,6 +127,8 @@ jobs:
 
       - name: Build
         run: |
+          sudo apt update
+          sudo apt install -y p7zip-full
           ls -l
           cd module
 
@@ -145,7 +147,7 @@ jobs:
           echo "updateJson=https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/update.json" >> module.prop
 
           cd ..
-          zip -r zapret-Magisk.zip module/*
+          7z a zapret-Magisk.zip module\* -x!module\
           
       - name: Set up Git
         run: |

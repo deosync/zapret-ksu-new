@@ -133,16 +133,16 @@ jobs:
           cd module
 
           COMMIT=$(git rev-parse --short HEAD)
-          COMMIT_COUNT=$(git shortlog | grep -E '^[ ]+\w+' | wc -l)
+          TIME=$(date +"%H%M%S")
           DATE=$(date +%Y%m%d)
           VERSION=${DATE}-${COMMIT}
           echo "version=${VERSION}" >> $GITHUB_ENV
-          echo "versionCode=${DATE}${COMMIT_COUNT}" >> $GITHUB_ENV
+          echo "versionCode=${DATE}${TIME}" >> $GITHUB_ENV
           
           echo "id=zapret" > module.prop
           echo "name=zapret" >> module.prop
           echo "version=${VERSION}" >> module.prop
-          echo "versionCode=${DATE}${COMMIT_COUNT}" >> module.prop
+          echo "versionCode=${DATE}${TIME}" >> module.prop
           echo "author=sevcator, ImMALWARE, bol-van" >> module.prop
           echo "description=🖥 Bypass internet-censorship on Android devices." >> module.prop
           echo "updateJson=https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/update.json" >> module.prop

@@ -94,11 +94,19 @@ jobs:
           name: nfqws-armeabi-v7a
           path: module/binaries
 
+      - name: Rename nfqws to nfqws-arm
+        run: |
+          mv module/binaries/nfqws module/binaries/nfqws-arm
+
       - name: Download nfqws arm64-v8a
         uses: actions/download-artifact@v4
         with:
           name: nfqws-arm64-v8a
           path: module/binaries
+
+      - name: Rename nfqws to nfqws-aarch64
+        run: |
+          mv module/binaries/nfqws module/binaries/nfqws-aarch64
 
       - name: Download nfqws x86
         uses: actions/download-artifact@v4
@@ -106,11 +114,19 @@ jobs:
           name: nfqws-x86
           path: module/binaries
 
+      - name: Rename nfqws to nfqws-x86
+        run: |
+          mv module/binaries/nfqws module/binaries/nfqws-x86
+
       - name: Download nfqws x86_64
         uses: actions/download-artifact@v4
         with:
           name: nfqws-x86_64
           path: module/binaries
+
+      - name: Rename nfqws to nfqws-x86_x64
+        run: |
+          mv module/binaries/nfqws module/binaries/nfqws-x86_x64
 
       - name: Build
         run: |
@@ -131,7 +147,7 @@ jobs:
           echo "updateJson=https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/update.json" >> module.prop
 
           cd ..
-          zip -r zapret-Magisk.zip module/
+          zip -r zapret-Magisk.zip module/* -x "module/*/"
           
       - name: Set up Git
         run: |

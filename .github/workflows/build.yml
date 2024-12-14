@@ -3,7 +3,7 @@ name: Build and Release Zapret
 on:
   push:
     tags:
-      - '*'
+      - 'v*'
   workflow_dispatch:
 
 jobs:
@@ -17,15 +17,12 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Clone bol-van/zapret
+      - name: Install Android NDK
         run: |
-          git clone https://github.com/bol-van/zapret.git zapret
-          cd zapret
-
-      - name: Set up Android NDK
-        uses: actions/setup-ndk@v1
-        with:
-          ndk-version: r25b
+          wget https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
+          unzip android-ndk-r25b-linux.zip -d $HOME
+          export ANDROID_NDK_HOME=$HOME/android-ndk-r25b
+          echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
 
       - name: Build for ${{ matrix.abi }}
         run: |

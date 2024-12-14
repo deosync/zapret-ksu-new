@@ -135,14 +135,15 @@ jobs:
           COMMIT=$(git rev-parse --short HEAD)
           NUMBERS=$(echo $COMMIT | grep -o '[0-9]' | tr -d '\n')
           DATE=$(date +%Y%m%d)
+          DATE2=$(date +%Y%d)
           VERSION=${DATE}-${COMMIT}
           echo "version=${VERSION}" >> $GITHUB_ENV
-          echo "versionCode=${DATE}${NUMBERS}" >> $GITHUB_ENV
+          echo "versionCode=${DATE2}${NUMBERS}" >> $GITHUB_ENV
           
           echo "id=zapret" > module.prop
           echo "name=zapret" >> module.prop
           echo "version=${VERSION}" >> module.prop
-          echo "versionCode=${DATE}${NUMBERS}" >> module.prop
+          echo "versionCode=${DATE2}${NUMBERS}" >> module.prop
           echo "author=sevcator, ImMALWARE, bol-van" >> module.prop
           echo "description=🖥 Bypass internet-censorship on Android devices." >> module.prop
           echo "updateJson=https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/update.json" >> module.prop

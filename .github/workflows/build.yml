@@ -55,21 +55,16 @@ jobs:
 
           for i in libmnl libnfnetlink libnetfilter_queue; do
             (
-              # Ensure correct directory
               cd $i-*
 
-              # Run the configure command with proper flags
               CFLAGS="-Os -flto=auto -Wno-implicit-function-declaration" \
               ./configure --prefix= --host=$TARGET --enable-static --disable-shared --disable-dependency-tracking
 
-              # Install dependencies to $DEPS_DIR
               make install -j$(nproc) DESTDIR=$DEPS_DIR
             )
-            # Fix pkgconfig paths to point to correct location
             sed -i "s|^prefix=.*|prefix=$DEPS_DIR|g" $DEPS_DIR/lib/pkgconfig/$i.pc
           done
 
-          # Build zapret with correct flags
           CFLAGS="-DZAPRET_GH_VER=${{ github.ref_name }} -DZAPRET_GH_HASH=${{ github.sha }} -I$DEPS_DIR/include" \
           LDFLAGS="-L$DEPS_DIR/lib" \
           make -C zapret android -j$(nproc)
@@ -78,5 +73,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: nfqws-${{ matrix.abi }}
-          path: zapret/binaries/my/nfqws-${{ matrix.abi }}
+          path: zapret/binaries/my/nfqws
           if-no-files-found: error

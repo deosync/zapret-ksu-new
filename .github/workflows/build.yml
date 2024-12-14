@@ -167,6 +167,14 @@ jobs:
           release_name: ${{ env.version }}
           draft: false # Set to true for draft, false for public
           prerelease: false # Change to true if it's a prerelease
-          files: zm-${{ env.version }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          fail_on_unmatched_files: true
+          prerelease: false
+          draft: false
+          files: |
+            zm-${{ env.version }}.zip

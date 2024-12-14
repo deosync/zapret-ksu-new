@@ -135,7 +135,7 @@ jobs:
           COMMIT=$(git rev-parse --short HEAD)
           NUMBERS=$(echo $COMMIT | grep -o '[0-9]' | tr -d '\n')
           DATE=$(date +%Y%m%d)
-          DATE2=$(date +%Y%d)
+          DATE2=$(date +%d)
           VERSION=${DATE}-${COMMIT}
           echo "version=${VERSION}" >> $GITHUB_ENV
           echo "versionCode=${DATE2}${NUMBERS}" >> $GITHUB_ENV

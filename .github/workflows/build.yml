@@ -131,8 +131,7 @@ jobs:
           echo "updateJson=https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/update.json" >> module.prop
 
           cd ..
-          zip -r "zm-${{ env.version }}.zip" module/*
-          ls -l
+          zip -r zapret-Magisk.zip module/
           
       - name: Set up Git
         run: |
@@ -144,7 +143,7 @@ jobs:
           echo '{
             "version": "${{ env.version }}",
             "versionCode": "${{ env.version }}",
-            "zipUrl": "https://github.com/${{ github.repository }}/releases/download/${{ env.version }}/zm-${{ env.version }}.zip",
+            "zipUrl": "https://github.com/${{ github.repository }}/releases/download/${{ env.version }}/zapret-Magisk.zip",
             "changelog": "https://raw.githubusercontent.com/${{ github.repository }}/main/CHANGELOG.md"
           }' > update.json
     
@@ -168,7 +167,7 @@ jobs:
           release_name: ${{ env.version }}
           draft: false # Set to true for draft, false for public
           prerelease: false # Change to true if it's a prerelease
-          files: zm-${{ env.version }}.zip
+          files: zapret-Magisk.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           

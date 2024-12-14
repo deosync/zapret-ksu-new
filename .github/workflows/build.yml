@@ -78,7 +78,7 @@ jobs:
           mkdir -p ../binaries/my/$ABI
           cp nfqws ../binaries/my/$ABI/nfqws
 
-      - name: Upload Binary
+      - name: Upload Binary for ${{ matrix.abi }}
         uses: actions/upload-artifact@v3
         with:
           name: nfqws-${{ matrix.abi }}
@@ -88,22 +88,31 @@ jobs:
     name: Build Zapret Module
     runs-on: ubuntu-latest
     needs: build-zapret
+    strategy:
+      matrix:
+        abi: [armeabi-v7a, arm64-v8a, x86, x86_64]
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Download Binaries
+      - name: Download Binary Artifacts
         uses: actions/download-artifact@v3
         with:
           name: nfqws-${{ matrix.abi }}
 
       - name: Prepare Module
         run: |
+          # Create the module directory and prepare the module
           mkdir -p module/binaries
-          cp -r binaries module/
+          cp -r zapret/binaries/my/${{ matrix.abi }}/* module/binaries/
           cd module
+
+          # Get commit hash and date for versioning
           COMMIT=$(git rev-parse --short HEAD)
           DATE=$(date +%Y%m%d)
+
+          # Write module properties
           echo "id=zapret" > module.prop
           echo "name=zapret" >> module.prop
           echo "version=$DATE-$COMMIT" >> module.prop
@@ -111,6 +120,8 @@ jobs:
           echo "author=sevcator, ImMALWARE, bol-van" >> module.prop
           echo "description=🖥 Bypass internet-censorship on arm64 Android devices." >> module.prop
           echo "updateJson=https://raw.githubusercontent.com/sevcator/zapret-magisk/refs/heads/main/update.json" >> module.prop
+
+          # Create the zip file for the module
           cd ..
           zip -r zm-$DATE-$COMMIT.zip module
 
@@ -120,6 +131,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: zm-${{ steps.prepare.outputs.date }}-${{ steps.prepare.outputs.commit }}.zip
-          asset_name: zm-${{ steps.prepare.outputs.date }}-${{ steps.prepare.outputs.commit }}.zip
+          asset_path: zm-${{ github.run_id }}.zip  # Ensure proper file naming
+          asset_name: zm-${{ github.run_id }}.zip
           asset_content_type: application/zip

@@ -90,7 +90,7 @@ jobs:
           abis=("armeabi-v7a" "arm64-v8a" "x86" "x86_64")
           for abi in "${abis[@]}"; do
             echo "Downloading nfqws-${abi} artifact..."
-            curl -LO "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/${{ github.run_id }}-nfqws-${abi}"
+            curl -LO "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/${{ github.run_id }}-nfqws-${abi}/download"
           done
           
       - name: Build Module

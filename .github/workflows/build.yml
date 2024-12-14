@@ -132,7 +132,8 @@ jobs:
 
           cd ..
           zip -r "zm-${{ env.version }}.zip" module/*
-
+          ls -l
+          
       - name: Set up Git
         run: |
           git config --global user.name "github-actions"

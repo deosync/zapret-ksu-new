@@ -163,8 +163,8 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ env.tag_name }}
-          release_name: ${{ env.release_name }}
+          tag_name: ${{ env.version }}
+          release_name: ${{ env.version }}
           draft: false # Set to true for draft, false for public
           prerelease: false # Change to true if it's a prerelease
           files: zm-${{ env.version }}.zip

@@ -23,7 +23,8 @@ jobs:
 
       - name: Set up Android NDK
         run: |
-          # Download and unzip the NDK
+          echo "Setting up Android NDK..."
+          # Скачиваем и распаковываем NDK
           wget https://dl.google.com/android/repository/android-ndk-r25b-linux.zip -O ndk.zip
           unzip ndk.zip -d $HOME
           export ANDROID_NDK_HOME=$HOME/android-ndk-r25b
@@ -31,52 +32,16 @@ jobs:
 
       - name: Verify NDK installation
         run: |
-          # Check the NDK directory contents
           echo "Checking NDK installation..."
           ls -l $ANDROID_NDK_HOME
           ls -l $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin
           which clang
           clang --version
 
-      - name: Debug NDK Setup and Tools
-        run: |
-          echo "Checking toolchain availability"
-          ls -l $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin
-          echo "Verifying clang functionality"
-          $CC --version
-          echo "Verifying C++ compiler"
-          $CXX --version
-          echo "Verifying make and environment"
-          make --version
-          echo "Displaying environment variables"
-          env
-
       - name: Build for ${{ matrix.abi }}
         run: |
-          # Set up environment variables for the build process
-          export ABI=${{ matrix.abi }}
-          export TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64
-          export TARGET=${ABI/-*/}-linux-android
-          export API=21
-          export CC=$TOOLCHAIN/bin/$TARGET$API-clang
-          export CXX=$TOOLCHAIN/bin/$TARGET$API-clang++
-          export AR=$TOOLCHAIN/bin/llvm-ar
-          export AS=$TOOLCHAIN/bin/llvm-as
-          export LD=$TOOLCHAIN/bin/ld
-          export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
-
-          echo "Using clang: $CC"
-          which $CC
-          $CC --version
-
-          # Build the project with verbose output to help with debugging
-          cd zapret/nfq
-          make clean
-          make ABI=$ABI VERBOSE=1
-
-          # Copy the binary to the artifacts folder
-          mkdir -p ../binaries/my/$ABI
-          cp nfqws ../binaries/my/$ABI/nfqws
+          # Указываем путь к скрипту и вызываем его
+          ./build.sh ${{ matrix.abi }} $ANDROID_NDK_HOME
 
       - name: Upload Binary for ${{ matrix.abi }}
         uses: actions/upload-artifact@v3
@@ -101,18 +66,26 @@ jobs:
         with:
           name: nfqws-${{ matrix.abi }}
 
+      - name: Verify Downloaded Binary
+        run: |
+          # Проверим, что бинарный файл был загружен
+          ls -l zapret/binaries/my/${{ matrix.abi }}
+          if [ ! -f zapret/binaries/my/${{ matrix.abi }}/nfqws ]; then
+            echo "Error: Binary nfqws not found!" && exit 1
+          fi
+
       - name: Prepare Module
         run: |
-          # Create the module directory and prepare the module
+          # Создадим модуль и подготовим его
           mkdir -p module/binaries
           cp -r zapret/binaries/my/${{ matrix.abi }}/* module/binaries/
           cd module
 
-          # Get commit hash and date for versioning
+          # Получим хэш коммита и дату для версионирования
           COMMIT=$(git rev-parse --short HEAD)
           DATE=$(date +%Y%m%d)
 
-          # Write module properties
+          # Напишем свойства модуля
           echo "id=zapret" > module.prop
           echo "name=zapret" >> module.prop
           echo "version=$DATE-$COMMIT" >> module.prop
@@ -121,7 +94,7 @@ jobs:
           echo "description=🖥 Bypass internet-censorship on arm64 Android devices." >> module.prop
           echo "updateJson=https://raw.githubusercontent.com/sevcator/zapret-magisk/refs/heads/main/update.json" >> module.prop
 
-          # Create the zip file for the module
+          # Создадим zip-файл для модуля
           cd ..
           zip -r zm-$DATE-$COMMIT.zip module
 
@@ -131,6 +104,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: zm-${{ github.run_id }}.zip  # Ensure proper file naming
+          asset_path: zm-${{ github.run_id }}.zip  # Убедитесь, что имя файла правильное
           asset_name: zm-${{ github.run_id }}.zip
           asset_content_type: application/zip

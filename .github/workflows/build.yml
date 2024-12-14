@@ -1,10 +1,12 @@
-name: Build and Release Zapret
+name: Build and Test Android Project
 
 on:
   push:
-    tags:
-      - 'v*'
-  workflow_dispatch:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build-android:
@@ -23,34 +25,20 @@ jobs:
             target: x86_64-linux-android
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           path: zapret
 
-      - name: Set up Android NDK
-        run: |
-          # Download and unzip the NDK
-          wget https://dl.google.com/android/repository/android-ndk-r25b-linux.zip -O ndk.zip
-          unzip ndk.zip -d $HOME
-          export ANDROID_NDK_HOME=$HOME/android-ndk-r25b
-          echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
-
-      - name: Verify NDK installation
-        run: |
-          # Check the NDK directory contents
-          echo "Checking NDK installation..."
-          ls -l $ANDROID_NDK_HOME
-          ls -l $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin
-          which clang
-          clang --version
-          
-      - name: Build Dependencies
+      - name: Build
+        env:
+          ABI: ${{ matrix.abi }}
+          TARGET: ${{ matrix.target }}
         run: |
           DEPS_DIR=$GITHUB_WORKSPACE/deps
           export TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64
           export API=21
-          export CC="$TOOLCHAIN/bin/clang --target=${{ matrix.target }}$API"
+          export CC="$TOOLCHAIN/bin/clang --target=$TARGET$API"
           export AR=$TOOLCHAIN/bin/llvm-ar
           export AS=$CC
           export LD=$TOOLCHAIN/bin/ld
@@ -58,86 +46,38 @@ jobs:
           export STRIP=$TOOLCHAIN/bin/llvm-strip
           export PKG_CONFIG_PATH=$DEPS_DIR/lib/pkgconfig
 
-          # Download and install netfilter libs
+          # netfilter libs
           wget -qO- https://www.netfilter.org/pub/libnfnetlink/libnfnetlink-1.0.2.tar.bz2 | tar -xj
           wget -qO- https://www.netfilter.org/pub/libmnl/libmnl-1.0.5.tar.bz2 | tar -xj
           wget -qO- https://www.netfilter.org/pub/libnetfilter_queue/libnetfilter_queue-1.0.5.tar.bz2 | tar -xj
-          wget https://raw.githubusercontent.com/bol-van/zapret/refs/heads/master/.github/workflows/libnetfilter_queue-android.patch -O patch.patch
 
-          # Apply the patch using the full path
-          patch -p1 -i $GITHUB_WORKSPACE/patch.patch -d libnetfilter_queue-*
+          # Apply patch for libnetfilter_queue
+          patch -p1 -d libnetfilter_queue-1.0.5 -i zapret/.github/workflows/libnetfilter_queue-android.patch
 
-          # Debugging: Check the contents of the extracted directories
-          echo "Listing extracted files in libnetfilter_queue:"
-          ls -l libnetfilter_queue-*
-
-          # Build dependencies
-          for i in libmnl libnfnetlink libnetfilter_queue ; do
+          for i in libmnl libnfnetlink libnetfilter_queue; do
             (
+              # Ensure correct directory
+              cd $i-*
+
+              # Run the configure command with proper flags
               CFLAGS="-Os -flto=auto -Wno-implicit-function-declaration" \
-              ./configure --prefix= --host=${{ matrix.target }} --enable-static --disable-shared --disable-dependency-tracking
+              ./configure --prefix= --host=$TARGET --enable-static --disable-shared --disable-dependency-tracking
+
+              # Install dependencies to $DEPS_DIR
               make install -j$(nproc) DESTDIR=$DEPS_DIR
             )
+            # Fix pkgconfig paths to point to correct location
             sed -i "s|^prefix=.*|prefix=$DEPS_DIR|g" $DEPS_DIR/lib/pkgconfig/$i.pc
           done
 
-      - name: Build Zapret
-        run: |
+          # Build zapret with correct flags
           CFLAGS="-DZAPRET_GH_VER=${{ github.ref_name }} -DZAPRET_GH_HASH=${{ github.sha }} -I$DEPS_DIR/include" \
           LDFLAGS="-L$DEPS_DIR/lib" \
           make -C zapret android -j$(nproc)
 
-      - name: Upload Android Artifacts
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: nfqws-${{ matrix.abi }}
           path: zapret/binaries/my/nfqws-${{ matrix.abi }}
           if-no-files-found: error
-
-  build-module:
-    name: Build Zapret Module
-    runs-on: ubuntu-latest
-    needs: build-android
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Download Binary Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: nfqws-${{ matrix.abi }}
-
-      - name: Prepare Module
-        run: |
-          # Create the module directory and prepare the module
-          mkdir -p module/binaries
-          cp -r zapret/binaries/my/${{ matrix.abi }}/* module/binaries/
-          cd module
-
-          # Get commit hash and date for versioning
-          COMMIT=$(git rev-parse --short HEAD)
-          DATE=$(date +%Y%m%d)
-
-          # Write module properties
-          echo "id=zapret" > module.prop
-          echo "name=zapret" >> module.prop
-          echo "version=$DATE-$COMMIT" >> module.prop
-          echo "versionCode=$DATE-$COMMIT" >> module.prop
-          echo "author=sevcator, ImMALWARE, bol-van" >> module.prop
-          echo "description=🖥 Bypass internet-censorship on arm64 Android devices." >> module.prop
-          echo "updateJson=https://raw.githubusercontent.com/sevcator/zapret-magisk/refs/heads/main/update.json" >> module.prop
-
-          # Create the zip file for the module
-          cd ..
-          zip -r zm-$DATE-$COMMIT.zip module/*
-
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: zm-${{ github.run_id }}.zip
-          asset_name: zm-${{ github.run_id }}.zip
-          asset_content_type: application/zip

@@ -57,8 +57,7 @@ jobs:
           ls -l libnetfilter_queue-android.patch
 
           # Apply the patch to the libnetfilter_queue directory
-          cd libnetfilter_queue-*
-          patch -p1 -i ../../libnetfilter_queue-android.patch
+          patch -p1 -i libnetfilter_queue-android.patch
 
       - name: Build Dependencies
         run: |
@@ -80,7 +79,6 @@ jobs:
           
           for i in libmnl libnfnetlink libnetfilter_queue ; do
             (
-              cd $i-*
               CFLAGS="-Os -flto=auto -Wno-implicit-function-declaration" \
               ./configure --prefix= --host=${{ matrix.target }} --enable-static --disable-shared --disable-dependency-tracking
               make install -j$(nproc) DESTDIR=$DEPS_DIR
@@ -93,25 +91,18 @@ jobs:
           CFLAGS="-DZAPRET_GH_VER=${{ github.ref_name }} -DZAPRET_GH_HASH=${{ github.sha }} -I$DEPS_DIR/include" \
           LDFLAGS="-L$DEPS_DIR/lib" \
           make -C zapret android -j$(nproc)
-          
-      - name: Create ZIP of Binaries
-        run: |
-          zip zapret-android-${{ matrix.abi }}.zip -j zapret/binaries/my/*
 
       - name: Upload Android Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: zapret-android-${{ matrix.abi }}
-          path: zapret-android-${{ matrix.abi }}.zip
+          name: nfqws-${{ matrix.abi }}
+          path: zapret/binaries/my/nfqws-${{ matrix.abi }}
           if-no-files-found: error
 
   build-module:
     name: Build Zapret Module
     runs-on: ubuntu-latest
     needs: build-android
-    strategy:
-      matrix:
-        abi: [armeabi-v7a, arm64-v8a, x86, x86_64]
 
     steps:
       - name: Checkout Repository
@@ -120,7 +111,7 @@ jobs:
       - name: Download Binary Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: zapret-android-${{ matrix.abi }}
+          name: nfqws-${{ matrix.abi }}
 
       - name: Prepare Module
         run: |
@@ -144,7 +135,7 @@ jobs:
 
           # Create the zip file for the module
           cd ..
-          zip -r zm-$DATE-$COMMIT.zip module
+          zip -r zm-$DATE-$COMMIT.zip module/*
 
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1

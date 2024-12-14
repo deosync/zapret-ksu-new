@@ -57,8 +57,8 @@ jobs:
           ls -l libnetfilter_queue-android.patch
 
           # Apply the patch to the libnetfilter_queue directory
-          patch -p1 -d libnetfilter_queue-* -i libnetfilter_queue-android.patch
-
+          patch -p1 -i libnetfilter_queue-android.patch
+          
       - name: Build Dependencies
         run: |
           DEPS_DIR=$GITHUB_WORKSPACE/deps

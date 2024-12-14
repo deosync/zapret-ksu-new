@@ -133,15 +133,14 @@ jobs:
           cd module
 
           COMMIT=$(git rev-parse --short HEAD)
+          COMMIT_COUNT=$(git rev-list --count HEAD)
           DATE=$(date +%Y%m%d)
-          VERSION="${DATE}-${COMMIT}"
-          echo "version=$VERSION" >> $GITHUB_ENV
-          echo "versionCode=$COMMIT2" >> $GITHUB_ENV
+          echo "versionCode=${DATE}${COMMIT_COUNT}" >> $GITHUB_ENV
           
           echo "id=zapret" > module.prop
           echo "name=zapret" >> module.prop
           echo "version=${DATE}-${COMMIT}" >> module.prop
-          echo "versionCode=${DATE}-${COMMIT}" >> module.prop
+          echo "versionCode=${DATE}${COMMIT_COUNT}" >> module.prop
           echo "author=sevcator, ImMALWARE, bol-van" >> module.prop
           echo "description=🖥 Bypass internet-censorship on Android devices." >> module.prop
           echo "updateJson=https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/update.json" >> module.prop
@@ -158,7 +157,7 @@ jobs:
         run: |
           echo '{
             "version": "${{ env.version }}",
-            "versionCode": "${{ env.version }}",
+            "versionCode": "${{ env.versionCode }}",
             "zipUrl": "https://github.com/${{ github.repository }}/releases/download/${{ env.version }}/zapret-Magisk.zip",
             "changelog": "https://raw.githubusercontent.com/${{ github.repository }}/main/CHANGELOG.md"
           }' > update.json

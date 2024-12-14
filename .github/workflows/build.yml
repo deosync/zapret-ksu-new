@@ -75,3 +75,46 @@ jobs:
           name: nfqws-${{ matrix.abi }}
           path: zapret/binaries/my/nfqws
           if-no-files-found: error
+  build-module:
+    name: Build Zapret Module
+    runs-on: ubuntu-latest
+    needs: build-android
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download Binary Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: nfqws-${{ matrix.abi }}
+
+      - name: Prepare Module
+        run: |
+          mkdir -p module/binaries
+          cp nfqws-* module/binaries/
+          cd module
+
+          COMMIT=$(git rev-parse --short HEAD)
+          DATE=$(date +%Y%m%d)
+
+          echo "id=zapret" > module.prop
+          echo "name=zapret" >> module.prop
+          echo "version=$DATE-$COMMIT" >> module.prop
+          echo "versionCode=$DATE-$COMMIT" >> module.prop
+          echo "author=sevcator, ImMALWARE, bol-van" >> module.prop
+          echo "description=🖥 Bypass internet-censorship on Android devices." >> module.prop
+          echo "updateJson=https://raw.githubusercontent.com/sevcator/zapret-magisk/refs/heads/main/update.json" >> module.prop
+
+          cd ..
+          zip -r zm-$DATE-$COMMIT.zip module/*
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: zm-${{ github.run_id }}.zip
+          asset_name: zm-${{ github.run_id }}.zip
+          asset_content_type: application/zip

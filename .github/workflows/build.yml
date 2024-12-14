@@ -38,6 +38,19 @@ jobs:
           which clang
           clang --version
 
+      - name: Debug NDK Setup and Tools
+        run: |
+          echo "Checking toolchain availability"
+          ls -l $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin
+          echo "Verifying clang functionality"
+          $CC --version
+          echo "Verifying C++ compiler"
+          $CXX --version
+          echo "Verifying make and environment"
+          make --version
+          echo "Displaying environment variables"
+          env
+
       - name: Build for ${{ matrix.abi }}
         run: |
           # Set up environment variables for the build process
@@ -52,9 +65,9 @@ jobs:
           export LD=$TOOLCHAIN/bin/ld
           export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
 
-          # Check if clang is available
           echo "Using clang: $CC"
           which $CC
+          $CC --version
 
           # Build the project with verbose output to help with debugging
           cd zapret/nfq

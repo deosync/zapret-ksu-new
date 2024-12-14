@@ -1,0 +1,85 @@
+name: Build and Release Zapret
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-zapret:
+    name: Build Android Binaries
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        abi: [armeabi-v7a, arm64-v8a, x86, x86_64]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Android NDK
+        uses: android/ndk@v1
+        with:
+          ndk-version: r25b
+
+      - name: Build for ${{ matrix.abi }}
+        run: |
+          export ABI=${{ matrix.abi }}
+          export TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64
+          export TARGET=${ABI/-*/}-linux-android
+          export API=21
+          export CC=$TOOLCHAIN/bin/$TARGET$API-clang
+          export CXX=$TOOLCHAIN/bin/$TARGET$API-clang++
+          export AR=$TOOLCHAIN/bin/llvm-ar
+          export AS=$TOOLCHAIN/bin/llvm-as
+          export LD=$TOOLCHAIN/bin/ld
+          export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
+
+          cd zapret/binaries/my
+          make clean
+          make TARGET=$ABI
+
+      - name: Upload Binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: nfqws-${{ matrix.abi }}
+          path: zapret/binaries/my/nfqws
+
+  build-module:
+    name: Build Zapret Module
+    runs-on: ubuntu-latest
+    needs: build-zapret
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Download Binaries
+        uses: actions/download-artifact@v3
+        with:
+          path: binaries
+
+      - name: Prepare Module
+        run: |
+          cd module
+          COMMIT=$(git rev-parse --short HEAD)
+          DATE=$(date +%Y%m%d)
+          echo "id=zapret" > module.prop
+          echo "name=zapret" >> module.prop
+          echo "version=$DATE-$COMMIT" >> module.prop
+          echo "versionCode=$DATE-$COMMIT" >> module.prop
+          echo "author=sevcator, ImMALWARE, bol-van" >> module.prop
+          echo "description=🖥 Bypass internet-censorship on arm64 Android devices." >> module.prop
+          echo "updateJson=https://raw.githubusercontent.com/sevcator/zapret-magisk/refs/heads/main/update.json" >> module.prop
+          cd ..
+          cp -r binaries module/
+          zip -r zm-$DATE-$COMMIT.zip module
+
+      - name: Publish Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: zm-${{ steps.prepare.outputs.date }}-${{ steps.prepare.outputs.commit }}.zip
+          asset_name: zm-${{ steps.prepare.outputs.date }}-${{ steps.prepare.outputs.commit }}.zip
+          asset_content_type: application/zip

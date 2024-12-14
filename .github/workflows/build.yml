@@ -135,11 +135,11 @@ jobs:
       - name: Update update.json
         run: |
           echo '{
-      "version": "'$DATE'-'$COMMIT'",
-      "versionCode": "'$DATE'-'$COMMIT'",
-      "zipUrl": "https://github.com/${{ github.repository }}/releases/download/'$DATE'-'$COMMIT'/zm-'$DATE'-'$COMMIT'.zip",
-      "changelog": "https://raw.githubusercontent.com/${{ github.repository }}/main/CHANGELOG.md"
-    }' > update.json
+            "version": "'${DATE}-${COMMIT}'",
+            "versionCode": "'${DATE}-${COMMIT}'",
+            "zipUrl": "https://github.com/${{ github.repository }}/releases/download/'${DATE}-${COMMIT}'/zm-'${DATE}-${COMMIT}'.zip",
+            "changelog": "https://raw.githubusercontent.com/${{ github.repository }}/main/CHANGELOG.md"
+          }' > update.json
     
           git add update.json
           git commit -m "Update update.json for release $DATE-$COMMIT"

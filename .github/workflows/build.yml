@@ -67,6 +67,11 @@ jobs:
           # Apply the patch using the full path
           patch -p1 -i $GITHUB_WORKSPACE/patch.patch -d libnetfilter_queue-*
 
+          # Debugging: Check the contents of the extracted directories
+          echo "Listing extracted files in libnetfilter_queue:"
+          ls -l libnetfilter_queue-*
+
+          # Build dependencies
           for i in libmnl libnfnetlink libnetfilter_queue ; do
             (
               CFLAGS="-Os -flto=auto -Wno-implicit-function-declaration" \

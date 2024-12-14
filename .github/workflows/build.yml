@@ -88,14 +88,12 @@ jobs:
       - name: Download Artifacts
         run: |
           abis=("armeabi-v7a" "arm64-v8a" "x86" "x86_64")
-
+          
           for abi in "${abis[@]}"; do
             echo "Downloading nfqws-${abi} artifact..."
-            actions/download-artifact@v4:
-              with:
-                name: nfqws-${abi}
+            curl -LO "https://github.com/${{ github.repository }}/actions/artifacts/${{ github.run_id }}/nfqws-${abi}"
           done
-
+          
       - name: Build Module
         run: |
           mkdir -p module/binaries

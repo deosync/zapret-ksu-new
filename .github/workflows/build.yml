@@ -14,10 +14,13 @@ jobs:
       matrix:
         abi: [armeabi-v7a, arm64-v8a, x86, x86_64]
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      - name: Clone Zapret Repository
+        run: |
+          git clone https://github.com/bol-van/zapret.git
+          cd zapret
+          git submodule update --init --recursive
 
-      - name: Install Android NDK
+      - name: Set up Android NDK
         run: |
           wget https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
           unzip android-ndk-r25b-linux.zip -d $HOME
@@ -37,7 +40,7 @@ jobs:
           export LD=$TOOLCHAIN/bin/ld
           export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
 
-          cd zapret/binaries/my
+          cd zapret
           make clean
           make TARGET=$ABI
 
@@ -61,6 +64,7 @@ jobs:
           path: binaries
 
       - name: Prepare Module
+        id: prepare
         run: |
           cd module
           COMMIT=$(git rev-parse --short HEAD)
@@ -75,6 +79,8 @@ jobs:
           cd ..
           cp -r binaries module/
           zip -r zm-$DATE-$COMMIT.zip module
+          echo "date=$DATE" >> $GITHUB_ENV
+          echo "commit=$COMMIT" >> $GITHUB_ENV
 
       - name: Publish Release
         uses: actions/upload-release-asset@v1
@@ -82,6 +88,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: zm-${{ steps.prepare.outputs.date }}-${{ steps.prepare.outputs.commit }}.zip
-          asset_name: zm-${{ steps.prepare.outputs.date }}-${{ steps.prepare.outputs.commit }}.zip
+          asset_path: zm-${{ env.date }}-${{ env.commit }}.zip
+          asset_name: zm-${{ env.date }}-${{ env.commit }}.zip
           asset_content_type: application/zip

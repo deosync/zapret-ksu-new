@@ -51,5 +51,5 @@ while true; do
         iptMultiPort "tcp" "$tcp_ports";
         iptMultiPort "udp" "$udp_ports";
     fi
-    sleep 80
+    sleep 60
 done

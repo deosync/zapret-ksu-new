@@ -85,31 +85,36 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Create binaries directory
+        run: mkdir -p module/binaries
+
       - name: Download nfqws armeabi-v7a
         uses: actions/download-artifact@v4
         with:
           name: nfqws-armeabi-v7a
+          path: module/binaries
 
       - name: Download nfqws arm64-v8a
         uses: actions/download-artifact@v4
         with:
           name: nfqws-arm64-v8a
+          path: module/binaries
 
       - name: Download nfqws x86
         uses: actions/download-artifact@v4
         with:
           name: nfqws-x86
+          path: module/binaries
 
       - name: Download nfqws x86_64
         uses: actions/download-artifact@v4
         with:
           name: nfqws-x86_64
+          path: module/binaries
 
       - name: Build
         run: |
           ls -l
-          mkdir -p module/binaries
-          cp nfqws-* module/binaries/
           cd module
 
           COMMIT=$(git rev-parse --short HEAD)

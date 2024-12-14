@@ -145,7 +145,7 @@ jobs:
           echo "updateJson=https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/update.json" >> module.prop
 
           cd ..
-          zip -r0 zapret-Magisk.zip module/*
+          zip -r zapret-Magisk.zip module/*
           
       - name: Set up Git
         run: |

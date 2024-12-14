@@ -55,9 +55,10 @@ jobs:
           # Ensure the patch file is present
           echo "Listing the patch file:"
           ls -l libnetfilter_queue-android.patch
-          
+
           # Apply the patch to the libnetfilter_queue directory
-          patch -p1 -d libnetfilter_queue-* -i libnetfilter_queue-android.patch
+          cd libnetfilter_queue-*
+          patch -p1 -i ../../libnetfilter_queue-android.patch
 
       - name: Build Dependencies
         run: |

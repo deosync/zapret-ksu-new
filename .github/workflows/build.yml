@@ -158,7 +158,7 @@ jobs:
       - name: Update update.json
         run: |
           echo '{
-            "version": "${{ env.version }}",
+            "version": "${{ env.versionCode }}",
             "versionCode": "${{ env.versionCode }}",
             "zipUrl": "https://github.com/${{ github.repository }}/releases/download/${{ env.version }}/zapret-Magisk.zip",
             "changelog": "https://raw.githubusercontent.com/${{ github.repository }}/main/CHANGELOG.md"

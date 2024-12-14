@@ -135,11 +135,13 @@ jobs:
           COMMIT=$(git rev-parse --short HEAD)
           COMMIT_COUNT=$(git rev-list --count HEAD)
           DATE=$(date +%Y%m%d)
+          VERSION=${DATE}-${COMMIT}
+          echo "version=${VERSION}" >> $GITHUB_ENV
           echo "versionCode=${DATE}${COMMIT_COUNT}" >> $GITHUB_ENV
           
           echo "id=zapret" > module.prop
           echo "name=zapret" >> module.prop
-          echo "version=${DATE}-${COMMIT}" >> module.prop
+          echo "version=${VERSION}" >> module.prop
           echo "versionCode=${DATE}${COMMIT_COUNT}" >> module.prop
           echo "author=sevcator, ImMALWARE, bol-van" >> module.prop
           echo "description=🖥 Bypass internet-censorship on Android devices." >> module.prop

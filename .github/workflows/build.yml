@@ -119,17 +119,19 @@ jobs:
 
           COMMIT=$(git rev-parse --short HEAD)
           DATE=$(date +%Y%m%d)
+          VERSION="${DATE}-${COMMIT}"
+          echo "version=$VERSION" >> $GITHUB_ENV
           
           echo "id=zapret" > module.prop
           echo "name=zapret" >> module.prop
-          echo "version=${DATE}-${COMMIT}" >> module.prop
-          echo "versionCode=${DATE}-${COMMIT}" >> module.prop
+          echo "version=${{ env.version }}" >> module.prop
+          echo "versionCode=${{ env.version }}" >> module.prop
           echo "author=sevcator, ImMALWARE, bol-van" >> module.prop
           echo "description=🖥 Bypass internet-censorship on Android devices." >> module.prop
           echo "updateJson=https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/update.json" >> module.prop
 
           cd ..
-          zip -r zm-$DATE-$COMMIT.zip module/*
+          zip -r "zm-${{ env.version }}.zip" module/*
 
       - name: Set up Git
         run: |
@@ -139,33 +141,24 @@ jobs:
       - name: Update update.json
         run: |
           echo '{
-            "version": "${DATE}-${COMMIT}",
-            "versionCode": "${DATE}-${COMMIT}",
-            "zipUrl": "https://github.com/${{ github.repository }}/releases/download/${DATE}-${COMMIT}/zm-${DATE}-${COMMIT}.zip",
+            "version": "${{ env.version }}",
+            "versionCode": "${{ env.version }}",
+            "zipUrl": "https://github.com/${{ github.repository }}/releases/download/${{ env.version }}/zm-${{ env.version }}.zip",
             "changelog": "https://raw.githubusercontent.com/${{ github.repository }}/main/CHANGELOG.md"
           }' > update.json
     
           git add update.json
-          git commit -m "Update update.json for release ${DATE}-${COMMIT}"
+          git commit -m "Update update.json for release ${{ env.version }}"
 
       - name: Push update.json to main branch
         run: |
           git push origin HEAD:main
 
-      - name: Get current date and commit hash
+      - name: Create a Git tag
         id: date_commit
         run: |
-          DATE=$(date +'%Y%m%d')
-          COMMIT_HASH=$(git rev-parse --short HEAD)
-          echo "DATE=$DATE"
-          echo "COMMIT_HASH=$COMMIT_HASH"
-          echo "tag_name=$DATE-$COMMIT_HASH" >> $GITHUB_ENV
-          echo "release_name=$DATE-$COMMIT_HASH" >> $GITHUB_ENV
-
-      - name: Create a Git tag
-        run: |
-          git tag ${{ env.tag_name }}
-          git push origin ${{ env.tag_name }}
+          git tag ${{ env.version }}
+          git push origin ${{ env.version }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
@@ -174,5 +167,6 @@ jobs:
           release_name: ${{ env.release_name }}
           draft: false # Set to true for draft, false for public
           prerelease: false # Change to true if it's a prerelease
+          files: zm-${{ env.version }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

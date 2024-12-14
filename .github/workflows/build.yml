@@ -171,7 +171,7 @@ jobs:
         run: |
           git push origin HEAD:main --force
 
-      - name: Create a Git tag
+      - name: Create a Git Tag
         id: date_commit
         run: |
           git tag ${{ env.version }}

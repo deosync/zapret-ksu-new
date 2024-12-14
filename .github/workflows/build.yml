@@ -133,7 +133,7 @@ jobs:
           cd module
 
           COMMIT=$(git rev-parse --short HEAD)
-          COMMIT_COUNT=$(git rev-list --count HEAD)
+          COMMIT_COUNT=$(git shortlog | grep -E '^[ ]+\w+' | wc -l)
           DATE=$(date +%Y%m%d)
           VERSION=${DATE}-${COMMIT}
           echo "version=${VERSION}" >> $GITHUB_ENV

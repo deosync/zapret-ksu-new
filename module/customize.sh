@@ -1,4 +1,5 @@
 #!/sbin/sh
+# sevcator/zapret-magisk
 
 umask 022
 

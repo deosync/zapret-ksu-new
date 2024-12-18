@@ -63,21 +63,17 @@ install_module() {
   rm -rf nfqws-*
 
   if ls $MODULE_DIR/*.txt 1> /dev/null 2>&1; then
-    ui_print "- Removing txt files in $MODULE_UPDATE_DIR"
-    rm -f $MODULE_UPDATE_DIR/*.txt
+    ui_print "- Replacing hosts in update dir"
+    cp $MODULE_DIR/*.txt $MODULE_UPDATE_DIR/
   fi
   
   if [ -f "$MODULE_DIR/zapret.sh" ]; then
+    ui_print "- Moving service script"
     mv "$MODULE_DIR/zapret.sh" "$SERVICE_DIR/zapret.sh"
-    ui_print "- zapret.sh moved to $SERVICE_DIR"
-  fi
-
-  if [ -f "$MODULE_UPDATE_DIR/zapret.sh" ]; then
+  elif [ -f "$MODULE_UPDATE_DIR/zapret.sh" ]; then
+    ui_print "- Moving service script"
     mv "$MODULE_UPDATE_DIR/zapret.sh" "$SERVICE_DIR/zapret.sh"
-    ui_print "- zapret.sh moved to $SERVICE_DIR"
-  fi
-
-  if [ ! -f "$SERVICE_DIR/zapret.sh" ]; then
+  else
     ui_print "! zapret.sh not found in $SERVICE_DIR"
     abort
   fi
@@ -89,9 +85,10 @@ install_module() {
   chmod 755 "$MODULE_DIR"/*
   chmod 755 "$SERVICE_DIR/zapret.sh"
 
-  ui_print "************************************"
-  ui_print "- sevcator.t.me / sevcator.github.io"
-  ui_print "************************************"
+  ui_print "*******************************************************"
+  ui_print "-         sevcator.t.me / sevcator.github.io           "
+  ui_print "- Please leave star on GitHub, if you like this module "
+  ui_print "*******************************************************"
   ui_print "- Done"
 }
 

@@ -1,5 +1,13 @@
 name: Build Zapret Module
 
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: ''
+        required: true
+        default: ''
+
 jobs:
   build-android:
     name: Build Zapret for Android ${{ matrix.abi }}

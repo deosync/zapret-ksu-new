@@ -1,13 +1,5 @@
 name: Build Zapret Module
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
 jobs:
   build-android:
     name: Build Zapret for Android ${{ matrix.abi }}

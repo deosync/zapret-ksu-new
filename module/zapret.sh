@@ -7,7 +7,7 @@ boot_wait() {
 boot_wait
 
 MODDIR=/data/adb/modules/zapret
-config="--filter-tcp=80,443 --hostlist-exclude=$MODDIR/exclude.txt --hostlist-auto=$MODDIR/autohostlist.txt --hostlist-auto-fail-threshold=2 --hostlist-auto-fail-time=60 --hostlist-auto-retrans-threshold=2 --dpi-desync=fake --dpi-desync-repeats=6 --dpi-desync-fooling=md5sig --dpi-desync-fake-tls=$MODDIR/t_google.bin --dpi-desync-fake-quic=$MODDIR/q_google.bin --new";
+config="--filter-tcp=80,443 --hostlist-exclude=$MODDIR/exclude.txt --hostlist-auto=$MODDIR/autohostlist.txt --hostlist-auto-fail-threshold=2 --hostlist-auto-fail-time=60 --hostlist-auto-retrans-threshold=2 --dpi-desync=fake,fakedsplit --dpi-desync-autottl=2 --dpi-desync-fooling=md5sig --dpi-desync-fake-tls=$MODDIR/t_google.bin --new";
 config="$config --filter-udp=50000-50099 --ipset=$MODDIR/ipset-discord.txt --dpi-desync=fake --dpi-desync-any-protocol --dpi-desync-fake-tls=$MODDIR/t_google.bin --dpi-desync-fake-quic=$MODDIR/q_google.bin --new";
 config="$config --filter-udp=80,443 --hostlist-exclude=$MODDIR/exclude.txt --hostlist-auto=$MODDIR/autohostlist.txt --hostlist-auto-fail-threshold=2 --hostlist-auto-fail-time=60 --hostlist-auto-retrans-threshold=2 --hostlist-auto-fail-threshold=2 --hostlist-auto-fail-time=60 --hostlist-auto-retrans-threshold=2 --dpi-desync=fake --dpi-desync-repeats=11 --dpi-desync-fake-tls=$MODDIR/t_google.bin --dpi-desync-fake-quic=$MODDIR/q_google.bin";
 

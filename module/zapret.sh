@@ -12,7 +12,7 @@ config="--filter-tcp=80,443 --wssize=1:6 --dpi-desync=fake --dpi-desync-repeats=
 config="$config --filter-udp=50000-50099 --ipset=$MODDIR/ipset-discord.txt --dpi-desync=fake --dpi-desync-any-protocol --dpi-desync-fake-tls=$MODDIR/t_google.bin --dpi-desync-fake-quic=$MODDIR/q_google.bin --new";
 config="$config --filter-udp=80,443 --dpi-desync=fake --dpi-desync-repeats=11 --dpi-desync-fake-tls=$MODDIR/t_google.bin --dpi-desync-fake-quic=$MODDIR/q_google.bin $hostlist";
 
-FQWS_PORTS_TCP="$(echo $CONFIG | grep -oE 'filter-tcp=[0-9,-]+' | sed -e 's/.*=//g' -e 's/,/\n/g' | sort -un)";
+NFQWS_PORTS_TCP="$(echo $CONFIG | grep -oE 'filter-tcp=[0-9,-]+' | sed -e 's/.*=//g' -e 's/,/\n/g' | sort -un)";
 NFQWS_PORTS_UDP="$(echo $CONFIG | grep -oE 'filter-udp=[0-9,-]+' | sed -e 's/.*=//g' -e 's/,/\n/g' | sort -un)";
 sysctl net.netfilter.nf_conntrack_tcp_be_liberal=1 > /dev/null;
 sysctl net.netfilter.nf_conntrack_checksum=0 > /dev/null;

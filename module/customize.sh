@@ -49,7 +49,6 @@ check_requirements() {
 check_requirements
 
 install_module() {
-  MODULE_DIR="/data/adb/modules/zapret"
   MODULE_UPDATE_DIR="/data/adb/modules_update/zapret"
   SERVICE_DIR="/data/adb/service.d"
 
@@ -61,16 +60,16 @@ install_module() {
   mv "$BINARY_PATH" "$MODPATH/nfqws"
 
   ui_print "- Removing binaries for another processors"
-  rm -rf nfqws-*
+  rm -rf "$MODPATH/nfqws-*"
 
-  if ls $MODULE_DIR/*.txt 1> /dev/null 2>&1; then
-    ui_print "- Replacing hosts in update dir"
-    cp $MODULE_DIR/*.txt $MODULE_UPDATE_DIR/
+  if ls $MODPATH/*.txt 1> /dev/null 2>&1; then
+    ui_print "- Copying txt in update dir"
+    cp $MODPATH/*.txt $MODULE_UPDATE_DIR/
   fi
   
-  if [ -f "$MODULE_DIR/zapret.sh" ]; then
+  if [ -f "$MODPATH/zapret.sh" ]; then
     ui_print "- Moving service script"
-    mv "$MODULE_DIR/zapret.sh" "$SERVICE_DIR/zapret.sh"
+    mv "$MODPATH/zapret.sh" "$SERVICE_DIR/zapret.sh"
   elif [ -f "$MODULE_UPDATE_DIR/zapret.sh" ]; then
     ui_print "- Moving service script"
     mv "$MODULE_UPDATE_DIR/zapret.sh" "$SERVICE_DIR/zapret.sh"
@@ -81,9 +80,10 @@ install_module() {
 
   ui_print "- Fixing scripts"
   sed -i 's/\r$//' "$SERVICE_DIR/zapret.sh"
-
+  sed -i 's/\r$//' "$MODPATH/uninstall.sh"
+  
   ui_print "- Setting permissions"
-  chmod 755 "$MODULE_DIR"/*
+  chmod 755 "$MODPATH"/*
   chmod 755 "$SERVICE_DIR/zapret.sh"
 
   ui_print "*******************************************************"

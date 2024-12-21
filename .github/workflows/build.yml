@@ -143,7 +143,7 @@ jobs:
           echo "name=zapret" >> module.prop
           echo "version=${VERSION}" >> module.prop
           echo "versionCode=${DATE2}" >> module.prop
-          echo "author=sevcator, ImMALWARE, bol-van" >> module.prop
+          echo "author=sevcator, ImMALWARE, bol-van, Fenrir-0xFF" >> module.prop
           echo "description=🖥 Bypass internet-censorship on Android devices." >> module.prop
           echo "updateJson=https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/update.json" >> module.prop
 

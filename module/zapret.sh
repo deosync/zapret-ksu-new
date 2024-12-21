@@ -16,24 +16,11 @@ sysctl net.netfilter.nf_conntrack_tcp_be_liberal=1 > /dev/null;
 chmod 755 $MODDIR/*
 chmod 666 "$MODDIR"/*.txt
 chmod 666 "$MODDIR"/*.bin
-cbOrig="-m connbytes --connbytes-dir=original --connbytes-mode=packets --connbytes 1:12 -m mark ! --mark 0x40000000/0x40000000";
-cbReply="-m connbytes --connbytes-dir=reply --connbytes-mode=packets --connbytes 1:6 -m mark ! --mark 0x40000000/0x40000000";
-
-check_iptables_support() {
-    if iptables -t mangle -A POSTROUTING -p tcp -m connbytes --connbytes-dir=original --connbytes-mode=packets --connbytes 1:12 -j ACCEPT 2>/dev/null; then
-        iptables -t mangle -D POSTROUTING -p tcp -m connbytes --connbytes-dir=original --connbytes-mode=packets --connbytes 1:12 -j ACCEPT 2>/dev/null
-        echo "2"
-    else
-        echo "3"
-    fi
-}
-use_iptables=$(check_iptables_support)
 
 iptAdd() {
-    if [[ "$use_iptables" == "3" ]]; then cbOrig=""; cbReply=""; fi;
     iptDPort="--dport $2"; iptSPort="--sport $2";
-    iptables -t mangle -I POSTROUTING -p $1 $iptDPort $cbOrig -j NFQUEUE --queue-num 200 --queue-bypass;
-    iptables -t mangle -I PREROUTING -p $1 $iptSPort $cbReply -j NFQUEUE --queue-num 200 --queue-bypass;
+    iptables -t mangle -I POSTROUTING -p $1 $iptDPort -j NFQUEUE --queue-num 200 --queue-bypass;
+    iptables -t mangle -I PREROUTING -p $1 $iptSPort -j NFQUEUE --queue-num 200 --queue-bypass;
 }
 
 iptMultiPort() {

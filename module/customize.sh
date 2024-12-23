@@ -60,8 +60,8 @@ install_module() {
   mv "$MODPATH/$BINARY" "$MODPATH/nfqws"
 
   ui_print "- Removing binaries for another processors"
-  rm -rf "$MODPATH/nfqws-*"
-  rm -rf "$MODULE_UPDATE_DIR/nfqws-*"
+  rm -rf $MODPATH/nfqws-*
+  rm -rf $MODULE_UPDATE_DIR/nfqws-*
 
   if ls $MODPATH/*.txt 1> /dev/null 2>&1; then
     ui_print "- Copying txt in update dir"

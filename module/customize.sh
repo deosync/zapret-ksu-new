@@ -10,16 +10,16 @@ ui_print() {
 check_requirements() {
   case "$ARCH" in
     arm)
-      BINARY_PATH=$MODPATH/nfqws-arm
+      BINARY=nfqws-arm
       ;;
     arm64)
-      BINARY_PATH=$MODPATH/nfqws-aarch64
+      BINARY=nfqws-aarch64
       ;;
     x86)
-      BINARY_PATH=$MODPATH/nfqws-x86
+      BINARY=nfqws-x86
       ;;
     x86_64)
-      BINARY_PATH=$MODPATH/nfqws-x86_x64
+      BINARY=nfqws-x86_x64
       ;;
     *)
       ui_print "! Unsupported architecture: $ARCH"
@@ -50,36 +50,27 @@ check_requirements
 
 install_module() {
   MODULE_UPDATE_DIR="/data/adb/modules_update/zapret"
-  SERVICE_DIR="/data/adb/service.d"
-
+  
   ui_print "- Killing processes"
   pkill nfqws
   pkill zapret
 
   ui_print "- Copying nfqws for $ARCH"
-  mv "$BINARY_PATH" "$MODPATH/nfqws"
+  mv "$MODULE_UPDATE_DIR/$BINARY" "$MODPATH/nfqws"
+  mv "$MODPATH/$BINARY" "$MODPATH/nfqws"
 
   ui_print "- Removing binaries for another processors"
   rm -rf "$MODPATH/nfqws-*"
+  rm -rf "$MODULE_UPDATE_DIR/nfqws-*"
 
   if ls $MODPATH/*.txt 1> /dev/null 2>&1; then
     ui_print "- Copying txt in update dir"
     cp $MODPATH/*.txt $MODULE_UPDATE_DIR/
   fi
-  
-  if [ -f "$MODPATH/zapret.sh" ]; then
-    ui_print "- Moving service script"
-    mv "$MODPATH/zapret.sh" "$SERVICE_DIR/zapret.sh"
-  elif [ -f "$MODULE_UPDATE_DIR/zapret.sh" ]; then
-    ui_print "- Moving service script"
-    mv "$MODULE_UPDATE_DIR/zapret.sh" "$SERVICE_DIR/zapret.sh"
-  else
-    ui_print "! zapret.sh not found in $SERVICE_DIR"
-    abort
-  fi
 
   ui_print "- Fixing scripts"
-  sed -i 's/\r$//' "$SERVICE_DIR/zapret.sh"
+  sed -i 's/\r$//' "$MODPATH/service.sh"
+  sed -i 's/\r$//' "$MODPATH/zapret-service"
   sed -i 's/\r$//' "$MODPATH/uninstall.sh"
   
   ui_print "- Setting permissions"

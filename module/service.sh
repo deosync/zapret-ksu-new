@@ -1,3 +1,3 @@
 #!/system/bin/sh
 
-su -c "/data/adb/modules/zapret/zapret-service"
+su -c "/data/adb/modules/zapret/zapret.sh"

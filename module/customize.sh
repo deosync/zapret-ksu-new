@@ -70,6 +70,7 @@ install_module() {
   
   ui_print "- Setting permissions"
   set_perm_recursive "$MODULE_DIR/*" 0 0 0755 0755
+  set_perm_recursive "$MODULE_UPDATE_DIR/*" 0 0 0755 0755
   
   ui_print "*******************************************************"
   ui_print "-         sevcator.t.me / sevcator.github.io           "

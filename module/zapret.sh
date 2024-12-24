@@ -103,7 +103,7 @@ while true; do
         sleep 3
         iptMultiPort "tcp" "$tcp_ports";
         iptMultiPort "udp" "$udp_ports";
-        "$MODDIR/nfqws" --uid=0:0 --bind-fix4 --qnum=200 $config > /dev/null &
+        "$MODDIR/nfqws" --uid=0:0 --qnum=200 $config > /dev/null &
     fi
     previous_interfaces=$current_interfaces
     sleep 15

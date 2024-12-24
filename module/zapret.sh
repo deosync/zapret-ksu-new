@@ -6,10 +6,10 @@ boot_wait
 
 MODDIR=/data/adb/modules/zapret
 hostlist="--hostlist-exclude=$MODDIR/exclude.txt --hostlist-auto=$MODDIR/autohostlist.txt"
-config="--filter-tcp=80 --dpi-desync=fake,fakedsplit --dpi-desync-autottl=2 --dpi-desync-fooling=md5sig $hostist --new"
+config="--filter-tcp=80 --dpi-desync=fake,fakedsplit --dpi-desync-autottl=2 --dpi-desync-fooling=md5sig --dpi-desync-fake-tls=$MODDIR/tls.bin $hostist --new"
 config="$config --filter-tcp=443 --hostlist=$MODDIR/google.txt --dpi-desync=fake,multidisorder --dpi-desync-split-pos=1,midsld --dpi-desync-repeats=11 --dpi-desync-fooling=md5sig --dpi-desync-fake-tls=$MODDIR/tls.bin --new"
 config="$config --filter-tcp=80 --hostlist=$MODDIR/google.txt --dpi-desync=fake,multidisorder --dpi-desync-split-pos=1,midsld --dpi-desync-repeats=11 --dpi-desync-fooling=md5sig --dpi-desync-fake-tls=$MODDIR/tls.bin --new"
-config="$config --filter-tcp=443 --dpi-desync=fake,multidisorder --dpi-desync-split-pos=midsld --dpi-desync-repeats=6 --dpi-desync-fooling=badseq,md5sig $hostlist --new"
+config="$config --filter-tcp=443 --dpi-desync=fake,multidisorder --dpi-desync-split-pos=midsld --dpi-desync-repeats=6 --dpi-desync-fooling=badseq,md5sig --dpi-desync-fake-tls=$MODDIR/tls.bin $hostlist --new"
 config="$config --filter-udp=443 --hostlist=$MODDIR/google.txt --dpi-desync=fake --dpi-desync-repeats=11 --dpi-desync-fake-quic=$MODDIR/quic.bin --new"
 config="$config --filter-udp=80 --hostlist=$MODDIR/google.txt --dpi-desync=fake --dpi-desync-repeats=11 --dpi-desync-fake-quic=$MODDIR/quic.bin --new"
 config="$config --filter-udp=80 --dpi-desync=fake --dpi-desync-repeats=11 $hostlist --new"

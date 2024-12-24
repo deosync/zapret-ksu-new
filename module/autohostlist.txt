@@ -25,4 +25,3 @@ soundcloud.cloud
 cloudflare-ech.com
 amazon.com
 amazonaws.com
-viber.com

@@ -69,8 +69,8 @@ install_module() {
   sed -i 's/\r$//' "$MODULE_DIR/uninstall.sh"
   
   ui_print "- Setting permissions"
-  chmod 755 "$MODULE_DIR"/*
-
+  set_perm_recursive "$MODULE_DIR/*" 0 0 0755 0755
+  
   ui_print "*******************************************************"
   ui_print "-         sevcator.t.me / sevcator.github.io           "
   ui_print "- Please leave star on GitHub, if you like this module "

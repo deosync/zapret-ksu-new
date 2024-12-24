@@ -55,7 +55,7 @@ install_module() {
   pkill zapret
 
   ui_print "- Device Architecture: $ARCH"
-  mv "$MODULE_UPDATE_DIR/$BINARY" "$MODULE_DIR/nfqws"
+  mv "$MODULE_UPDATE_DIR/$BINARY" "$MODULE_UPDATE_DIR/nfqws"
   mv "$MODULE_DIR/$BINARY" "$MODULE_DIR/nfqws"
   rm -rf $MODULE_DIR/nfqws-*
   rm -rf $MODULE_UPDATE_DIR/nfqws-*
@@ -69,8 +69,12 @@ install_module() {
   sed -i 's/\r$//' "$MODULE_DIR/uninstall.sh"
   
   ui_print "- Setting permissions"
-  set_perm_recursive "$MODULE_DIR/*" 0 0 0755 0755
-  set_perm_recursive "$MODULE_UPDATE_DIR/*" 0 0 0755 0755
+  DIR="/data/adb/modules/zapret"
+  for FILE in "$DIR"/*; do
+    if [ -f "$FILE" ]; then
+      set_perm "$FILE" root root 755
+    fi
+  done
   
   ui_print "*******************************************************"
   ui_print "-         sevcator.t.me / sevcator.github.io           "

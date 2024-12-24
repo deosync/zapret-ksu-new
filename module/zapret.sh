@@ -1,5 +1,5 @@
 boot_wait() {
-    while [[ -z $(getprop sys.boot_completed) ]]; do sleep 3; done
+    while [[ -z $(getprop sys.boot_completed) ]]; do sleep 10; done
 }
 
 boot_wait
@@ -8,6 +8,7 @@ MODDIR=/data/adb/modules/zapret
 hostlist="--hostlist-exclude=$MODDIR/exclude.txt --hostlist-auto=$MODDIR/autohostlist.txt"
 config="--filter-tcp=80 --dpi-desync=fake,fakedsplit --dpi-desync-autottl=2 --dpi-desync-fooling=md5sig $hostist --new"
 config="$config --filter-tcp=443 --hostlist=$MODDIR/google.txt --dpi-desync=fake,multidisorder --dpi-desync-split-pos=1,midsld --dpi-desync-repeats=11 --dpi-desync-fooling=md5sig --dpi-desync-fake-tls=$MODDIR/tls.bin --new"
+config="$config --filter-tcp=80 --hostlist=$MODDIR/google.txt --dpi-desync=fake,multidisorder --dpi-desync-split-pos=1,midsld --dpi-desync-repeats=11 --dpi-desync-fooling=md5sig --dpi-desync-fake-tls=$MODDIR/tls.bin --new"
 config="$config --filter-tcp=443 --dpi-desync=fake,multidisorder --dpi-desync-split-pos=midsld --dpi-desync-repeats=6 --dpi-desync-fooling=badseq,md5sig $hostlist --new"
 config="$config --filter-udp=443 --hostlist=$MODDIR/google.txt --dpi-desync=fake --dpi-desync-repeats=11 --dpi-desync-fake-quic=$MODDIR/quic.bin --new"
 config="$config --filter-udp=80 --dpi-desync=fake --dpi-desync-repeats=11 $hostlist --new"
@@ -17,14 +18,11 @@ config="$config --filter-udp=50000-50099 --ipset=$MODDIR/ipset-discord.txt --dpi
 tcp_ports="$(echo $config | grep -oE 'filter-tcp=[0-9,-]+' | sed -e 's/.*=//g' -e 's/,/\n/g' -e 's/ /,/g' | sort -un)";
 udp_ports="$(echo $config | grep -oE 'filter-udp=[0-9,-]+' | sed -e 's/.*=//g' -e 's/,/\n/g' -e 's/ /,/g' | sort -un)";
 sysctl net.netfilter.nf_conntrack_tcp_be_liberal=1 > /dev/null;
-chmod 755 $MODDIR/*
-chmod 666 "$MODDIR"/*.txt
-chmod 666 "$MODDIR"/*.bin
 
 iptAdd() {
-    iptDPort="--dport $2"; iptSPort="--sport $2";
-    iptables -t mangle -I POSTROUTING -p $1 $iptDPort -j NFQUEUE --queue-num 200 --queue-bypass;
-    iptables -t mangle -I PREROUTING -p $1 $iptSPort -j NFQUEUE --queue-num 200 --queue-bypass;
+    iptDPort="$iMportD $2"; iptSPort="$iMportS $2";
+    iptables -t mangle -I POSTROUTING -p $1 $iptDPort $iCBo $iMark -j NFQUEUE --queue-num 200 --queue-bypass;
+    iptables -t mangle -I PREROUTING -p $1 $iptSPort $iCBr $iMark -j NFQUEUE --queue-num 200 --queue-bypass;
 }
 
 iptMultiPort() {
@@ -87,12 +85,6 @@ if check_nfqws_running; then
 fi
 
 while true; do
-    current_interfaces=$(get_current_interfaces)
-    if [ "$current_interfaces" != "$previous_interfaces" ]; then
-        pkill nfqws
-        # echo "[$(date)] Network interfaces status changed. nfqws process killed." >> "$MODDIR/logs_watchdog.txt"
-    fi
-    previous_interfaces=$current_interfaces
     if ! pgrep -x "nfqws" > /dev/null; then
 	   # echo "[$(date)] nfqws not started, restarting..." >> "$MODDIR/logs.txt"
 	   "$MODDIR/nfqws" --uid=0:0 --bind-fix4 --qnum=200 $config > /dev/null &
@@ -103,5 +95,15 @@ while true; do
         iptMultiPort "tcp" "$tcp_ports";
         iptMultiPort "udp" "$udp_ports";
     fi
+    current_interfaces=$(get_current_interfaces)
+    if [ "$current_interfaces" != "$previous_interfaces" ]; then
+        pkill nfqws
+        # echo "[$(date)] Network interfaces status changed. nfqws process restarted." >> "$MODDIR/logs_watchdog.txt"
+        sleep 3
+        iptMultiPort "tcp" "$tcp_ports";
+        iptMultiPort "udp" "$udp_ports";
+        "$MODDIR/nfqws" --uid=0:0 --bind-fix4 --qnum=200 $config > /dev/null &
+    fi
+    previous_interfaces=$current_interfaces
     sleep 15
 done

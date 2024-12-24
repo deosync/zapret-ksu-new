@@ -1,6 +1,4 @@
 #!/system/bin/sh
-# MODDIR=${0%/*}
-# SERVICEDDIR=/data/adb/service.d
 
 su -c "kill $(pgrep -f '/data/adb/service.d/zapret.sh')"
 su -c 'pkill nfqws'

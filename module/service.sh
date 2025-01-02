@@ -1,22 +1,5 @@
 #!/system/bin/sh
-case "$ARCH" in
-    arm)
-      BINARY=nfqws-arm
-      ;;
-    arm64)
-      BINARY=nfqws-aarch64
-      ;;
-    x86)
-      BINARY=nfqws-x86
-      ;;
-    x86_64)
-      BINARY=nfqws-x86_x64
-      ;;
-    *)
-      ui_print "! Device Architecture: $ARCH"
-      abort
-      ;;
-esac
+case "$ARCH" in arm) BINARY=nfqws-arm;; arm64) BINARY=nfqws-aarch64;; x86) BINARY=nfqws-x86;; x86_64) BINARY=nfqws-x86_x64;; *) esac
 if [ -f "/data/adb/modules/zapret/$BINARY" ]; then
     mv "/data/adb/modules/zapret/$BINARY" "/data/adb/modules/zapret/nfqws"
     chmod 777 "/data/adb/modules/zapret/nfqws"

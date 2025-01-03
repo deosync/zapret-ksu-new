@@ -2,16 +2,16 @@
 arch=$(uname -m)
 case "$arch" in
     "x86_64")
-        nfqws="nfqws_x86_64"
+        nfqws="nfqws-x86_64"
         ;;
     "i386"|"i686")
-        nfqws="nfqws_x86"
+        nfqws="nfqws-x86"
         ;;
     "armv7l"|"arm")
-        nfqws="nfqws_arm32"
+        nfqws="nfqws-arm"
         ;;
     "aarch64")
-        nfqws="nfqws_arm64"
+        nfqws="nfqws-aarch64"
         ;;
     *)
         echo "Unknown arch: $arch"

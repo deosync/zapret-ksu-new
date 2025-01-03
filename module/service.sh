@@ -1,4 +1,23 @@
 #!/system/bin/sh
+arch=$(uname -m)
+case "$arch" in
+    "x86_64")
+        nfqws="nfqws_x86_64"
+        ;;
+    "i386"|"i686")
+        nfqws="nfqws_x86"
+        ;;
+    "armv7l"|"arm")
+        nfqws="nfqws_arm32"
+        ;;
+    "aarch64")
+        nfqws="nfqws_arm64"
+        ;;
+    *)
+        echo "Unknown arch: $arch"
+        exit 1
+        ;;
+esac
 BINARY=nfqws-aarch64
 if [ -f "/data/adb/modules/zapret/$BINARY" ]; then
     mv "/data/adb/modules/zapret/$BINARY" "/data/adb/modules/zapret/nfqws"
